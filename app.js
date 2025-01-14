@@ -55,12 +55,13 @@ app.get("/", (req, res) => {
 
 // // Webhook verification
 app.get("/webhook", (req, res) => {
-  const { validationToken } = req.query;
-  console.log("validation token is ", req.query);
-  if (validationToken) {
-    return res.status(200).send(validationToken);
-  }
-  return res.status(400).send("Validation token missing.");
+  // const { validationToken } = req.query;
+  // console.log("validation token is ", req.query);
+  // if (validationToken) {
+  // return res.status(200).send(validationToken);
+  return res.status(200).send("hello ");
+  // }
+  // return res.status(400).send("Validation token missing.");
 });
 
 app.post("/webhook", async (req, res) => {
