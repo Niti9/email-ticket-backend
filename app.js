@@ -55,67 +55,81 @@ app.get("/", (req, res) => {
 //   // res.status(202).send();
 // });
 
-// app.post("/webhook", (req, res) => {
-//   console.log("ye to chal gaya", req.query);
-//   try {
-//     if (req.query.validationToken) {
-//       // Respond with validation token for Microsoft Graph validation
-//       return res.status(200).send(req.query.validationToken);
-//     }
+app.post("/webhook", async (req, res) => {
+  console.log("ye to chal gaya", req.query);
+  try {
+    if (req.query.validationToken) {
+      // Respond with validation token for Microsoft Graph validation
+      return res.status(200).send(req.query.validationToken);
+    }
 
-//     const notifications = req.body.value;
-//     notifications.forEach((notification) => {
-//       console.log(
-//         "New email notification::::::::::::::::::::::::::::::::::::::::;",
-//         notification
-//       );
-//       // Fetch email details and store in DB
-//     });
-//     return res.status(202).send("Notification received and processed.");
-//   } catch (error) {
-//     console.log("error is ", error);
-//   }
-
-//   // res.status(202).send();
-// });
-
-// // Webhook verification
-app.get("/webhook", (req, res) => {
-  const { validationToken } = req.query;
-  console.log("validation token is ", validationToken);
-  if (req.query.validationToken) {
-    return res.status(200).send(validationToken);
+    const notifications = req.body.value;
+    notifications.forEach((notification) => {
+      console.log(
+        "New email notification::::::::::::::::::::::::::::::::::::::::;",
+        notification
+      );
+      // Fetch email details and store in DB
+    });
+    return res.status(202).send("Notification received and processed.");
+  } catch (error) {
+    console.log("error is ", error);
   }
+
+  // res.status(202).send();
+});
+
+app.get("/webhook", (req, res) => {
+  const notifications = req.body.value;
+  notifications.forEach((notification) => {
+    console.log(
+      "New email notification::::::::::::::::::::::::::::::::::::::::;",
+      notification
+    );
+    // Fetch email details and store in DB
+  });
+  // return res.status(202).send("Notification received and processed.");
   return res.status(200).send("hello ");
   // return res.status(400).send("Validation token missing.");
 });
 
-app.post("/webhook", async (req, res) => {
-  console.log("Received webhook notification:", req.body); // Log the incoming webhook data
+// // // Webhook verification
+// app.get("/webhook", (req, res) => {
+//   const { validationToken } = req.query;
+//   console.log("validation token is ", validationToken);
+//   if (req.query.validationToken) {
+//     return res.status(200).send(validationToken);
+//   }
+//   return res.status(200).send("hello ");
+//   // return res.status(400).send("Validation token missing.");
+// });
 
-  // // Check for the clientState in the webhook to validate the notification
-  // const clientState = req.body.clientState;
-  // if (clientState !== "yourClientState") {
-  //   console.log("Client state does not match. Ignoring notification.");
-  //   return res.status(400).send("Invalid client state");
-  // }
+// app.post("/webhook", async (req, res) => {
+//   console.log("Received webhook notification:", req.body); // Log the incoming webhook data
 
-  // // Log the resource data (new email details, for example)
-  // console.log("Resource URL:", req.body.value[0].resource);
+//   // // Check for the clientState in the webhook to validate the notification
+//   // const clientState = req.body.clientState;
+//   // if (clientState !== "yourClientState") {
+//   //   console.log("Client state does not match. Ignoring notification.");
+//   //   return res.status(400).send("Invalid client state");
+//   // }
 
-  // // You can fetch the email details using the resource URL (example)
-  // const resourceUrl = req.body.value[0].resource;
-  // console.log("Fetching email details from:", resourceUrl);
-  // // (Fetch the email details with an API call to Microsoft Graph)
+//   // // Log the resource data (new email details, for example)
+//   // console.log("Resource URL:", req.body.value[0].resource);
 
-  if (req.body) {
-    const data = await EmailSubscriptionData.save(req.body);
-    console.log("data is data", data);
-    res.status(201).send("Notification processed successfully");
-  } else {
-    res.status(200).send("Notification processed successfully");
-  }
-});
+//   // // You can fetch the email details using the resource URL (example)
+//   // const resourceUrl = req.body.value[0].resource;
+//   // console.log("Fetching email details from:", resourceUrl);
+//   // // (Fetch the email details with an API call to Microsoft Graph)
+
+//   if (req.body) {
+//     const data = await EmailSubscriptionData.save(req.body);
+//     console.log("data is data", data);
+//     res.status(201).send("Notification processed successfully");
+//   } else {
+//     res.status(200).send("Notification processed successfully");
+//   }
+// });
 
 // // Webhook validation
 // app.all("/webhook", (req, res) => {
