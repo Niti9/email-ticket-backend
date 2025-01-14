@@ -24,6 +24,7 @@ if (process.env.NODE_ENV !== "production") {
 // await databaseService.connectAllDataBases();
 import "./db/connection.js";
 import { EmailRoutes } from "./API/Routes/emailRoutes.js";
+import MailSubscription from "./Database/models/EmailToken/MailSubscription.js";
 app.use("/", EmailRoutes);
 
 app.get("/", (req, res) => {
@@ -62,26 +63,28 @@ app.get("/webhook", (req, res) => {
   return res.status(400).send("Validation token missing.");
 });
 
-// app.post("/webhook", (req, res) => {
-//   console.log("Received webhook notification:", req.body); // Log the incoming webhook data
+app.post("/webhook", async (req, res) => {
+  console.log("Received webhook notification:", req.body); // Log the incoming webhook data
 
-//   // Check for the clientState in the webhook to validate the notification
-//   const clientState = req.body.clientState;
-//   if (clientState !== "yourClientState") {
-//     console.log("Client state does not match. Ignoring notification.");
-//     return res.status(400).send("Invalid client state");
-//   }
+  // // Check for the clientState in the webhook to validate the notification
+  // const clientState = req.body.clientState;
+  // if (clientState !== "yourClientState") {
+  //   console.log("Client state does not match. Ignoring notification.");
+  //   return res.status(400).send("Invalid client state");
+  // }
 
-//   // Log the resource data (new email details, for example)
-//   console.log("Resource URL:", req.body.value[0].resource);
+  // // Log the resource data (new email details, for example)
+  // console.log("Resource URL:", req.body.value[0].resource);
 
-//   // You can fetch the email details using the resource URL (example)
-//   const resourceUrl = req.body.value[0].resource;
-//   console.log("Fetching email details from:", resourceUrl);
-//   // (Fetch the email details with an API call to Microsoft Graph)
+  // // You can fetch the email details using the resource URL (example)
+  // const resourceUrl = req.body.value[0].resource;
+  // console.log("Fetching email details from:", resourceUrl);
+  // // (Fetch the email details with an API call to Microsoft Graph)
 
-//   res.status(202).send("Notification processed successfully");
-// });
+  const data = new MailSubscription(req.body);
+  await data.save();
+  res.status(202).send("Notification processed successfully");
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
