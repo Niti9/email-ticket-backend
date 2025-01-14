@@ -25,6 +25,10 @@ if (process.env.NODE_ENV !== "production") {
 import "./db/connection.js";
 import { EmailRoutes } from "./API/Routes/emailRoutes.js";
 app.use("/", EmailRoutes);
+
+app.get("/", (req, res) => {
+  res.send("hi this is working perfectly fine and port is", PORT);
+});
 // Verify subscription validation token
 app.post("/webhook", (req, res) => {
   if (req.query.validationToken) {
