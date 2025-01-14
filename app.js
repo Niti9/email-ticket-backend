@@ -34,7 +34,7 @@ app.get("/", (req, res) => {
 });
 // // Verify subscription validation token
 app.post("/webhook", (req, res) => {
-  console.log("ye to chal gaya");
+  console.log("ye to chal gaya", req.query);
   if (req.query.validationToken) {
     // Respond with validation token for Microsoft Graph validation
     return res.status(200).send(req.query.validationToken);
