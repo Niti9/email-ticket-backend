@@ -55,12 +55,14 @@ app.get("/", (req, res) => {
 
 // // Webhook verification
 app.get("/webhook", (req, res) => {
-  // const { validationToken } = req.query;
-  // console.log("validation token is ", req.query);
-  // if (validationToken) {
-  // return res.status(200).send(validationToken);
+  const { validationToken } = req.query;
+  console.log("validation token is ", req.query);
+  if (validationToken) {
+    res.status(200).send("hi hello namaste ");
+
+    return res.status(200).send(validationToken);
+  }
   return res.status(200).send("hello ");
-  // }
   // return res.status(400).send("Validation token missing.");
 });
 
