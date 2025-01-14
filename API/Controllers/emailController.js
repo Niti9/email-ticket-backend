@@ -20,13 +20,14 @@ class EmailControllers {
         );
 
         // // Automatically create a subscription after getting the access token
-        // const subscription = await this.createSubscription(
-        //   accessToken.access_token,
-        //   userId
-        // );
+        const subscription = await this.createSubscription(
+          accessToken.access_token,
+          userId
+        );
 
-        const Messages = await this.getMessage(accessToken.access_token);
-        console.log("messages", Messages);
+        console.log("subscriptions are", subscription);
+        // const Messages = await this.getMessage(accessToken.access_token);
+        // console.log("messages", Messages);
         return res.status(200).send({
           access_token: accessToken.access_token,
           expires_in: accessToken.expires_in
@@ -145,7 +146,7 @@ class EmailControllers {
           // notificationUrl: "https://your-vercel-project.vercel.app/webhook",
           notificationUrl: "https://email-ticket-backend.vercel.app/webhook",
           resource: "me/messages",
-          // expirationDateTime: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
+          expirationDateTime: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
           clientState: "yourClientState"
           // clientState: userId
         },
