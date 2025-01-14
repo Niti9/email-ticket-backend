@@ -82,9 +82,13 @@ app.post("/webhook", async (req, res) => {
   // console.log("Fetching email details from:", resourceUrl);
   // // (Fetch the email details with an API call to Microsoft Graph)
 
-  const data = new MailSubscription(req.body);
-  await data.save();
-  res.status(202).send("Notification processed successfully");
+  if (req.body) {
+    const data = new MailSubscription(req.body);
+    await data.save();
+    res.status(201).send("Notification processed successfully");
+  } else {
+    res.status(200).send("Notification processed successfully");
+  }
 });
 
 const PORT = process.env.PORT || 5000;
