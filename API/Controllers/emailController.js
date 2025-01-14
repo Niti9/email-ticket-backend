@@ -25,12 +25,12 @@ class EmailControllers {
         //   userId
         // );
 
-        const Messages = await this.getMessage(accessToken.accessToken);
+        const Messages = await this.getMessage(accessToken.access_token);
         console.log("messages", Messages);
         return res.status(200).send({
           access_token: accessToken.access_token,
-          expires_in: accessToken.expires_in,
-          subscription_id: subscription.id
+          expires_in: accessToken.expires_in
+          // subscription_id: subscription.id
         });
       } catch (error) {
         console.error("Failed to fetch access token:", error);
