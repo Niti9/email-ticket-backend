@@ -19,13 +19,13 @@ class EmailControllers {
           tokenRecord.refresh_token
         );
 
-        // // Automatically create a subscription after getting the access token
-        const subscription = await this.createSubscription(
-          accessToken.access_token,
-          userId
-        );
+        // // // Automatically create a subscription after getting the access token
+        // const subscription = await this.createSubscription(
+        //   accessToken.access_token,
+        //   userId
+        // );
 
-        console.log("subscriptions are", subscription);
+        // console.log("subscriptions are", subscription);
         // const Messages = await this.getMessage(accessToken.access_token);
         // console.log("messages", Messages);
         return res.status(200).send({
@@ -133,11 +133,17 @@ class EmailControllers {
     }
   };
 
-  createSubscription = async (accessToken, userId) => {
+  // createSubscription = async (accessToken, userId) => {
+  createSubscription = async (req, res) => {
     try {
       // const accessToken = await getAccessToken();
       // const emailController = new EmailControllers();
       // const accessToken = await emailController.getAccessToken(refreshToken);
+
+      // Check if the refresh token exists in the database for this user
+      const userId = req.query.user_id; // Assume user_id is sent from the frontend
+      const tokenRecord = await TokenModel.findOne({ user_id: userId });
+      const accessToken = await this.getAccessToken(tokenRecord.refresh_token);
 
       const response = await axios.post(
         "https://graph.microsoft.com/v1.0/subscriptions",
