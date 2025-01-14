@@ -58,10 +58,10 @@ app.get("/", (req, res) => {
 app.post("/webhook", (req, res) => {
   console.log("ye to chal gaya", req.query);
   try {
-    if (req.query.validationToken) {
-      // Respond with validation token for Microsoft Graph validation
-      return res.status(200).send(req.query.validationToken);
-    }
+    // if (req.query.validationToken) {
+    //   // Respond with validation token for Microsoft Graph validation
+    //   return res.status(200).send(req.query.validationToken);
+    // }
 
     // Process incoming notifications
     console.log(
