@@ -169,6 +169,7 @@ class EmailControllers {
       console.log("Subscription created:", response.data);
       // console.log("Subscription initialized:", response.data.id);
       // return response.data;
+      return res.status(200).json(response.data);
     } catch (error) {
       console.error("Error creating subscription:", error.response.data);
       throw error;

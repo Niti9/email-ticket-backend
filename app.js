@@ -79,20 +79,6 @@ app.post("/webhook", async (req, res) => {
   // res.status(202).send();
 });
 
-app.get("/webhook", (req, res) => {
-  const notifications = req.body.value;
-  notifications.forEach((notification) => {
-    console.log(
-      "New email notification::::::::::::::::::::::::::::::::::::::::;",
-      notification
-    );
-    // Fetch email details and store in DB
-  });
-  // return res.status(202).send("Notification received and processed.");
-  return res.status(200).send("hello ");
-  // return res.status(400).send("Validation token missing.");
-});
-
 // // // Webhook verification
 // app.get("/webhook", (req, res) => {
 //   const { validationToken } = req.query;
