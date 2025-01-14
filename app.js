@@ -47,8 +47,9 @@ app.post("/webhook", (req, res) => {
     );
     // Fetch email details and store in DB
   });
+  return res.status(202).send("Notification received and processed.");
 
-  res.status(202).send();
+  // res.status(202).send();
 });
 
 const PORT = process.env.PORT || 5000;

@@ -1,102 +1,3 @@
-// import axios from "axios";
-// class EmailControllers {
-//   getEmailCode = async (req, res) => {
-//     try {
-//       // Extract the 'code' and 'state' from query parameters
-//       const code = req.query.code;
-//       const state = req.query.state;
-//       console.log("this is request query ", req.query);
-
-//       if (!code) {
-//         return res
-//           .status(400)
-//           .send("Authorization code not found in the callback URL");
-//       }
-
-//       // Respond back or proceed to the next step (e.g., exchange the code for a token)
-//       //   res.send(`Code received: ${code}`);
-//       res.send(`Code received: ${req.query}`);
-
-//       const tokenResponse = await this.getRefreshToken(code);
-//       console.log("Token Response:", tokenResponse);
-
-//       //   if (tokenResponse.refresh_token) {
-//       if (tokenResponse.refresh_token) {
-//         const accessToken = await this.getAccessToken(
-//           tokenResponse.refresh_token
-//         );
-//         console.log("Access Token Response:", accessToken);
-//       } else {
-//         console.log("No refresh token found in the response.");
-//       }
-//     } catch (error) {
-//       console.error("Error in getEmailCode:", error.message);
-//       res.status(500).send("An error occurred while processing your request.");
-//     }
-//   };
-
-//   getRefreshToken = async (code) => {
-//     if (!code) {
-//       return res.status(400).send(" code is missing");
-//     }
-
-//     try {
-//       const response = await axios.post(
-//         "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-//         new URLSearchParams({
-//           client_id: process.env.CLIENT_ID,
-//           client_secret: process.env.CLIENT_SECRET,
-//           redirect_uri: process.env.REDIRECT_URI,
-//           code: code,
-//           grant_type: "authorization_code",
-//           scope: "Mail.Read offline_access"
-//         }).toString(),
-//         {
-//           headers: { "Content-Type": "application/x-www-form-urlencoded" }
-//         }
-//       );
-
-//       return response.data;
-//     } catch (error) {
-//       console.error(
-//         "Error exchanging code for token:",
-//         error.response?.data || error.message
-//       );
-//     }
-//   };
-//   getAccessToken = async (value) => {
-//     if (!value) {
-//       return res.status(400).send(" response is missing");
-//     }
-
-//     try {
-//       const response = await axios.post(
-//         "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-//         new URLSearchParams({
-//           client_id: process.env.CLIENT_ID,
-//           client_secret: process.env.CLIENT_SECRET,
-//           redirect_uri: process.env.REDIRECT_URI,
-//           refresh_token: value,
-//           grant_type: "refresh_token",
-//           scope: "Mail.Read"
-//         }).toString(),
-//         {
-//           headers: { "Content-Type": "application/x-www-form-urlencoded" }
-//         }
-//       );
-
-//       // Handle the token response
-//       return response.data;
-//     } catch (error) {
-//       console.error(
-//         "Error exchanging code for token:",
-//         error.response?.data || error.message
-//       );
-//     }
-//   };
-// }
-// export default new EmailControllers();
-
 import axios from "axios";
 import { TokenModel } from "../../Database/models/EmailToken/emailTokenSchema.js";
 
@@ -250,7 +151,8 @@ export async function createSubscription(accessToken) {
       "https://graph.microsoft.com/v1.0/subscriptions",
       {
         changeType: "created",
-        notificationUrl: "https://your-vercel-project.vercel.app/webhook",
+        // notificationUrl: "https://your-vercel-project.vercel.app/webhook",
+        notificationUrl: "https://email-ticket-backend.vercel.app/webhook",
         resource: "me/messages",
         expirationDateTime: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
         clientState: "yourClientState"
@@ -297,4 +199,25 @@ export async function renewSubscription(subscriptionId) {
     throw error;
   }
 }
+
+// Function to delete an existing subscription
+const deleteSubscription = async (subscriptionId, accessToken) => {
+  try {
+    const response = await axios.delete(
+      `https://graph.microsoft.com/v1.0/subscriptions/${subscriptionId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      }
+    );
+
+    console.log("Subscription deleted successfully:", response.data);
+  } catch (error) {
+    console.error(
+      "Error deleting subscription:",
+      error.response?.data || error.message
+    );
+  }
+};
 export default new EmailControllers();
