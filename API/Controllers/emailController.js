@@ -158,7 +158,7 @@ class EmailControllers {
         },
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${accessToken.access_token}`,
             "Content-Type": "application/json"
           }
         }
