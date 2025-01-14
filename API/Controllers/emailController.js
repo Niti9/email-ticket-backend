@@ -128,7 +128,13 @@ class EmailControllers {
         "This is acccess Token which we passed to create Subscription ......................",
         response.data.access_token
       );
-      createSubscription(response.data.access_token);
+      const isSubscription = await createSubscription(
+        response.data.access_token
+      );
+      console.log(
+        "Successfully subscription created here================",
+        isSubscription
+      );
 
       return response.data;
     } catch (error) {
@@ -165,9 +171,10 @@ export async function createSubscription(accessToken) {
       }
     );
 
-    console.log("Subscription created:", response.data);
-    console.log("Subscription initialized:", response.data.id);
-    // return response.data;
+    // console.log("Subscription created:", response.data);
+    // console.log("Subscription created:", response);
+    // console.log("Subscription initialized:", response.data.id);
+    return response.data;
   } catch (error) {
     console.error("Error creating subscription:", error.response.data);
     throw error;
