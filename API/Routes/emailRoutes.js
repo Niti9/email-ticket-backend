@@ -3,6 +3,7 @@ import express from "express";
 const EmailRoutes = express.Router();
 EmailRoutes.get("/integration/outlookcallback", emailController.getEmailCode);
 EmailRoutes.get("/integration/consent", emailController.handleConsent);
+EmailRoutes.get("/createSubscription", emailController.createSubscription);
 //   {
 //     api: "/storeRefreshToken",
 //     method: "post",
