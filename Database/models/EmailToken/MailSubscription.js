@@ -1,12 +1,12 @@
-import { Schema, model } from "mongoose";
+import mongoose from "mongoose";
 
-const emailSubscriptionSchema = new Schema({
+const emailSubscriptionSchema = new mongoose.Schema({
   mailBody: {
     type: Object
   }
 });
 
-export default EmailSubscription = model(
+export const EmailSubscriptionData = mongoose.model(
   "EmailSubscription",
   emailSubscriptionSchema
 );

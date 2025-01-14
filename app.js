@@ -24,7 +24,7 @@ if (process.env.NODE_ENV !== "production") {
 // await databaseService.connectAllDataBases();
 import "./db/connection.js";
 import { EmailRoutes } from "./API/Routes/emailRoutes.js";
-import EmailSubscription from "./Database/models/EmailToken/MailSubscription.js";
+import { EmailSubscriptionData } from "./Database/models/EmailToken/MailSubscription.js";
 app.use("/", EmailRoutes);
 
 app.get("/", (req, res) => {
@@ -83,7 +83,7 @@ app.post("/webhook", async (req, res) => {
   // // (Fetch the email details with an API call to Microsoft Graph)
 
   if (req.body) {
-    const data = await EmailSubscription.save(req.body);
+    const data = await EmailSubscriptionData.save(req.body);
     console.log("data is data", data);
     res.status(201).send("Notification processed successfully");
   } else {
