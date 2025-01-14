@@ -22,22 +22,19 @@ class EmailControllers {
         const accessToken = await this.getAccessToken(
           tokenRecord.refresh_token
         );
-        try {
-          const response = await axios.get(
-            "https://graph.microsoft.com/v1.0/me/messages",
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken.access_token}`
-              }
-            }
-          );
-          // console.log(response.data);
-        } catch (error) {
-          console.error("API Error:", error.response?.data || error.message);
-        }
+
+        // Automatically create a subscription after getting the access token
+        const subscription = await this.createSubscription(
+          accessToken.access_token,
+          userId
+        );
+
+        const Messages = await this.getMessage(accessToken.accessToken);
+        console.log("messages", Messages);
         return res.status(200).send({
           access_token: accessToken.access_token,
-          expires_in: accessToken.expires_in
+          expires_in: accessToken.expires_in,
+          subscription_id: subscription.id
         });
       } catch (error) {
         console.error("Failed to fetch access token:", error);
@@ -138,40 +135,57 @@ class EmailControllers {
       throw error;
     }
   };
-}
 
-export async function createSubscription(accessToken) {
-  try {
-    // const accessToken = await getAccessToken();
-    // const emailController = new EmailControllers();
-    // const accessToken = await emailController.getAccessToken(refreshToken);
+  createSubscription = async (accessToken, userId) => {
+    try {
+      // const accessToken = await getAccessToken();
+      // const emailController = new EmailControllers();
+      // const accessToken = await emailController.getAccessToken(refreshToken);
 
-    const response = await axios.post(
-      "https://graph.microsoft.com/v1.0/subscriptions",
-      {
-        changeType: "created",
-        // notificationUrl: "https://your-vercel-project.vercel.app/webhook",
-        notificationUrl: "https://email-ticket-backend.vercel.app/webhook",
-        resource: "me/messages",
-        expirationDateTime: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
-        clientState: "yourClientState"
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
+      const response = await axios.post(
+        "https://graph.microsoft.com/v1.0/subscriptions",
+        {
+          changeType: "created",
+          // notificationUrl: "https://your-vercel-project.vercel.app/webhook",
+          notificationUrl: "https://email-ticket-backend.vercel.app/webhook",
+          resource: "me/messages",
+          expirationDateTime: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
+          // clientState: "yourClientState"
+          clientState: userId
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          }
         }
-      }
-    );
+      );
 
-    // console.log("Subscription created:", response.data);
-    console.log("Subscription created:", response);
-    // console.log("Subscription initialized:", response.data.id);
-    return response.data;
-  } catch (error) {
-    console.error("Error creating subscription:", error.response.data);
-    throw error;
-  }
+      // console.log("Subscription created:", response.data);
+      console.log("Subscription created:", response.data);
+      // console.log("Subscription initialized:", response.data.id);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating subscription:", error.response.data);
+      throw error;
+    }
+  };
+
+  getMessage = async (accessToken) => {
+    try {
+      const response = await axios.get(
+        "https://graph.microsoft.com/v1.0/me/messages",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error("API Error:", error.response?.data || error.message);
+    }
+  };
 }
 
 // Renew subscription
