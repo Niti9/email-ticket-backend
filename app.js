@@ -29,7 +29,7 @@ app.use("/", EmailRoutes);
 app.get("/", (req, res) => {
   res.send("hi this is working perfectly fine and port is");
   console.log("port is", process.env.PORT);
-  console.log("port is", process.env.REDIRECT_URI);
+  console.log("REdirect uri is", process.env.REDIRECT_URI);
 });
 // Verify subscription validation token
 app.post("/webhook", (req, res) => {
