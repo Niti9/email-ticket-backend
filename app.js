@@ -32,27 +32,27 @@ app.get("/", (req, res) => {
   console.log("port is", process.env.PORT);
   console.log("REdirect uri is", process.env.REDIRECT_URI);
 });
-// Verify subscription validation token
-app.post("/webhook", (req, res) => {
-  console.log("ye to chal gaya");
-  if (req.query.validationToken) {
-    // Respond with validation token for Microsoft Graph validation
-    return res.status(200).send(req.query.validationToken);
-  }
+// // Verify subscription validation token
+// app.post("/webhook", (req, res) => {
+//   console.log("ye to chal gaya");
+//   if (req.query.validationToken) {
+//     // Respond with validation token for Microsoft Graph validation
+//     return res.status(200).send(req.query.validationToken);
+//   }
 
-  // Process incoming notifications
-  const notifications = req.body.value;
-  notifications.forEach((notification) => {
-    console.log(
-      "New email notification::::::::::::::::::::::::::::::::::::::::;",
-      notification
-    );
-    // Fetch email details and store in DB
-  });
-  return res.status(202).send("Notification received and processed.");
+//   // Process incoming notifications
+//   const notifications = req.body.value;
+//   notifications.forEach((notification) => {
+//     console.log(
+//       "New email notification::::::::::::::::::::::::::::::::::::::::;",
+//       notification
+//     );
+//     // Fetch email details and store in DB
+//   });
+//   return res.status(202).send("Notification received and processed.");
 
-  // res.status(202).send();
-});
+//   // res.status(202).send();
+// });
 
 // // Webhook verification
 // app.get("/webhook", (req, res) => {
@@ -93,6 +93,32 @@ app.post("/webhook", (req, res) => {
 //     res.status(200).send("Notification processed successfully");
 //   }
 // });
+
+// Webhook validation
+app.all("/webhook", (req, res) => {
+  const validationToken = req.query.validationToken;
+  if (validationToken) {
+    console.log("Validation token received: ", validationToken);
+    // Respond with the validation token
+    return res.status(200).send(validationToken);
+  }
+
+  // Handle webhook notifications (for POST requests)
+  if (req.method === "POST") {
+    console.log("Received webhook notification:", req.body);
+
+    // Process incoming notifications
+    const notifications = req.body.value || [];
+    notifications.forEach((notification) => {
+      console.log("New email notification:", notification);
+      // Process the notification and fetch email details
+    });
+
+    return res.status(202).send("Notification received and processed.");
+  }
+
+  return res.status(400).send("Invalid request.");
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
