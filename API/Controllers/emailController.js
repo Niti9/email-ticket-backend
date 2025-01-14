@@ -14,23 +14,19 @@ class EmailControllers {
     const tokenRecord = await TokenModel.findOne({ user_id: userId });
 
     if (tokenRecord) {
-      // console.log(
-      //   "Refresh token exists. Fetching access token...",
-      //   tokenRecord
-      // );
       try {
         const accessToken = await this.getAccessToken(
           tokenRecord.refresh_token
         );
 
-        // Automatically create a subscription after getting the access token
-        const subscription = await this.createSubscription(
-          accessToken.access_token,
-          userId
-        );
+        // // Automatically create a subscription after getting the access token
+        // const subscription = await this.createSubscription(
+        //   accessToken.access_token,
+        //   userId
+        // );
 
-        // const Messages = await this.getMessage(accessToken.accessToken);
-        // console.log("messages", Messages);
+        const Messages = await this.getMessage(accessToken.accessToken);
+        console.log("messages", Messages);
         return res.status(200).send({
           access_token: accessToken.access_token,
           expires_in: accessToken.expires_in,
