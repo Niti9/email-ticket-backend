@@ -29,8 +29,8 @@ class EmailControllers {
           userId
         );
 
-        const Messages = await this.getMessage(accessToken.accessToken);
-        console.log("messages", Messages);
+        // const Messages = await this.getMessage(accessToken.accessToken);
+        // console.log("messages", Messages);
         return res.status(200).send({
           access_token: accessToken.access_token,
           expires_in: accessToken.expires_in,
