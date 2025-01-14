@@ -153,8 +153,8 @@ class EmailControllers {
           notificationUrl: "https://email-ticket-backend.vercel.app/webhook",
           resource: "me/messages",
           expirationDateTime: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
-          clientState: "yourClientState"
-          // clientState: userId
+          // clientState: "yourClientState"
+          clientState: userId
         },
         {
           headers: {
