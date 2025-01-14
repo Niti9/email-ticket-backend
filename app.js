@@ -55,6 +55,7 @@ app.get("/", (req, res) => {
 // Webhook verification
 app.get("/webhook", (req, res) => {
   const { validationToken } = req.query;
+  console.log("validation token is ", req.query);
   if (validationToken) {
     return res.status(200).send(validationToken);
   }
