@@ -63,11 +63,12 @@ app.post("/webhook", (req, res) => {
     //   return res.status(200).send(req.query.validationToken);
     // }
 
-    // Process incoming notifications
-    console.log(
-      "it should work as well ``````````````````````````````````````",
-      req.query.validationToken
-    );
+    if (req.query.validation)
+      // Process incoming notifications
+      console.log(
+        "it should work as well ``````````````````````````````````````",
+        req.query.validationToken
+      );
     const notifications = req.body.value;
     notifications.forEach((notification) => {
       console.log(
@@ -76,7 +77,9 @@ app.post("/webhook", (req, res) => {
       );
       // Fetch email details and store in DB
     });
-    return res.status(202).send("Notification received and processed.");
+    return res.status(200).send(req.query.validationToken);
+
+    // return res.status(202).send("Notification received and processed.");
   } catch (error) {
     console.log("error is ", error);
   }
