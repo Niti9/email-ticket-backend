@@ -118,11 +118,6 @@ class EmailControllers {
         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
       );
 
-      console.log(
-        "This is acccess Token which we passed to create Subscription ......................",
-        response.data.access_token
-      );
-
       return response.data;
     } catch (error) {
       console.error(
@@ -144,6 +139,12 @@ class EmailControllers {
       const userId = req.query.user_id; // Assume user_id is sent from the frontend
       const tokenRecord = await TokenModel.findOne({ user_id: userId });
       const accessToken = await this.getAccessToken(tokenRecord.refresh_token);
+      console.log(
+        "This is acccess Token which we passed to create Subscription ......................",
+        userId,
+        tokenRecord,
+        accessToken.access_token
+      );
 
       const response = await axios.post(
         "https://graph.microsoft.com/v1.0/subscriptions",
