@@ -52,13 +52,17 @@ app.get("/", (req, res) => {
 //   // res.status(202).send();
 // });
 
+// Webhook verification
+app.get("/webhook", (req, res) => {
+  const { validationToken } = req.query;
+  if (validationToken) {
+    return res.status(200).send(validationToken);
+  }
+  return res.status(400).send("Validation token missing.");
+});
+
 app.post("/webhook", (req, res) => {
   console.log("Received webhook notification:", req.body); // Log the incoming webhook data
-
-  const validationToken = req.query.validationToken;
-  if (validationToken) {
-    return res.send(validationToken); // Return validation token to confirm the webhook
-  }
 
   // Check for the clientState in the webhook to validate the notification
   const clientState = req.body.clientState;
