@@ -24,7 +24,7 @@ if (process.env.NODE_ENV !== "production") {
 // await databaseService.connectAllDataBases();
 import "./db/connection.js";
 import { EmailRoutes } from "./API/Routes/emailRoutes.js";
-import { EmailSubscriptionData } from "./Database/models/EmailToken/MailSubscription.js";
+import NotificationModel from "./Database/models/EmailToken/notificationSchema.js";
 app.use("/", EmailRoutes);
 
 app.get("/", (req, res) => {
@@ -33,50 +33,69 @@ app.get("/", (req, res) => {
   console.log("REdirect uri is", process.env.REDIRECT_URI);
 });
 
-// // Verify subscription validation token
-// app.post("/webhook", (req, res) => {
+// app.post("/webhook", async (req, res) => {
 //   console.log("ye to chal gaya", req.query);
-//   if (req.query.validationToken) {
-//     // Respond with validation token for Microsoft Graph validation
-//     return res.status(200).send(req.query.validationToken);
-//   }
+//   try {
+//     if (req.query.validationToken) {
+//       // Respond with validation token for Microsoft Graph validation
+//       return res.status(200).send(req.query.validationToken);
+//     }
 
-//   // Process incoming notifications
-//   const notifications = req.body.value;
-//   notifications.forEach((notification) => {
-//     console.log(
-//       "New email notification::::::::::::::::::::::::::::::::::::::::;",
-//       notification
-//     );
-//     // Fetch email details and store in DB
-//   });
-//   return res.status(202).send("Notification received and processed.");
+//     const notifications = req.body.value;
+//     notifications.forEach((notification) => {
+//       console.log(
+//         "New email notification::::::::::::::::::::::::::::::::::::::::;",
+//         notification
+//       );
+//       // Fetch email details and store in DB
+//     });
+//     return res.status(202).send("Notification received and processed.");
+//   } catch (error) {
+//     console.log("error is ", error);
+//   }
 
 //   // res.status(202).send();
 // });
 
 app.post("/webhook", async (req, res) => {
-  console.log("ye to chal gaya", req.query);
   try {
+    // Handle validation token
     if (req.query.validationToken) {
-      // Respond with validation token for Microsoft Graph validation
+      console.log("Validation Token Received:", req.query.validationToken);
       return res.status(200).send(req.query.validationToken);
     }
 
-    const notifications = req.body.value;
-    notifications.forEach((notification) => {
-      console.log(
-        "New email notification::::::::::::::::::::::::::::::::::::::::;",
-        notification
-      );
-      // Fetch email details and store in DB
-    });
-    return res.status(202).send("Notification received and processed.");
-  } catch (error) {
-    console.log("error is ", error);
-  }
+    // Log the received notification
+    console.log("Notification Received:", req.body);
 
-  // res.status(202).send();
+    const notifications = req.body.value;
+    if (!notifications || notifications.length === 0) {
+      console.log("No notifications received.");
+      return res.status(204).send("No notifications received.");
+    }
+
+    // Process notifications
+    for (const notification of notifications) {
+      console.log("Processing Notification:", notification);
+
+      // Save notification to the database
+      const notificationRecord = new NotificationModel({
+        subscriptionId: notification.subscriptionId,
+        resource: notification.resource,
+        changeType: notification.changeType,
+        clientState: notification.clientState,
+        timestamp: new Date()
+      });
+
+      await notificationRecord.save();
+      console.log("Notification saved to database.");
+    }
+
+    return res.status(202).send("Notifications processed.");
+  } catch (error) {
+    console.error("Error processing webhook:", error);
+    return res.status(500).send("Internal Server Error");
+  }
 });
 
 // // // Webhook verification
