@@ -27,6 +27,7 @@ import { EmailRoutes } from "./API/Routes/emailRoutes.js";
 import emailController from "./API/Controllers/emailController.js";
 import TicketModel from "./Database/models/EmailToken/ticketSchema.js";
 import { TokenModel } from "./Database/models/EmailToken/emailTokenSchema.js";
+import axios from "axios";
 // import NotificationModel from "./Database/models/EmailToken/notificationSchema.js";
 
 app.use("/", EmailRoutes);
