@@ -106,7 +106,7 @@ app.post("/webhook", async (req, res) => {
 app.get("/tickets", async (req, res) => {
   try {
     const tickets = await TicketModel.find({});
-    res.status(200).json(tickets);
+    return res.status(200).json(tickets);
   } catch (error) {
     console.error("Error fetching tickets:", error.message);
     res.status(500).send("Error fetching tickets.");

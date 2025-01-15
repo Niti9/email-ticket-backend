@@ -1,5 +1,6 @@
 import axios from "axios";
 import { TokenModel } from "../../Database/models/EmailToken/emailTokenSchema.js";
+import TicketModel from "../../Database/models/EmailToken/ticketSchema.js";
 
 class EmailControllers {
   // Method to check if refresh token exists, and if it does, get the access token
@@ -189,6 +190,27 @@ class EmailControllers {
       console.log(response.data);
     } catch (error) {
       console.error("API Error:", error.response?.data || error.message);
+    }
+  };
+
+  EditTicket = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+
+      // Update the ticket in the database
+      const updatedTicket = await TicketModel.findByIdAndUpdate(id, updates, {
+        new: true // Return the updated document
+      });
+
+      if (!updatedTicket) {
+        return res.status(404).send("Ticket not found.");
+      }
+
+      res.status(200).json(updatedTicket);
+    } catch (error) {
+      console.error("Error updating ticket:", error.message);
+      res.status(500).send("Error updating ticket.");
     }
   };
 }
