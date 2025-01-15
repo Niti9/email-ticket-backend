@@ -79,8 +79,7 @@ app.post("/webhook", async (req, res) => {
       const accessToken = await emailController.getAccessToken(
         tokenRecord.refresh_token
       ); // Get your OAuth token
-      // const emailId = notification.resource.split("/").pop(); // Extract email ID from resource
-      const emailId = notification.resource; // Extract email ID from resource
+      const emailId = notification.resource.split("/").pop(); // Extract email ID from resource
 
       const emailResponse = await axios.get(
         `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
