@@ -55,23 +55,6 @@ app.post("/webhook", async (req, res) => {
       return res.status(204).send("No notifications received.");
     }
 
-    // // Process notifications
-    // for (const notification of notifications) {
-    //   console.log("Processing Notification:", notification);
-
-    //   // Save notification to the database
-    //   const notificationRecord = new NotificationModel({
-    //     subscriptionId: notification.subscriptionId,
-    //     resource: notification.resource,
-    //     changeType: notification.changeType,
-    //     clientState: notification.clientState,
-    //     timestamp: new Date()
-    //   });
-
-    //   await notificationRecord.save();
-    //   console.log("Notification saved to database.");
-    // }
-
     for (const notification of notifications) {
       // Extract email details
 
@@ -82,6 +65,12 @@ app.post("/webhook", async (req, res) => {
       ); // Get your OAuth token
       const emailId = notification.resource.split("/").pop(); // Extract email ID from resource
 
+      // Check if the ticket already exists
+      const existingTicket = await TicketModel.findOne({ ticketId: emailId });
+      if (existingTicket) {
+        console.log(`Duplicate ticket detected for emailId: ${emailId}`);
+        continue; // Skip processing this notification
+      }
       const emailResponse = await axios.get(
         `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
         {
@@ -111,6 +100,16 @@ app.post("/webhook", async (req, res) => {
   } catch (error) {
     console.error("Error processing webhook:", error);
     return res.status(500).send("Internal Server Error");
+  }
+});
+
+app.get("/tickets", async (req, res) => {
+  try {
+    const tickets = await TicketModel.find({});
+    res.status(200).json(tickets);
+  } catch (error) {
+    console.error("Error fetching tickets:", error.message);
+    res.status(500).send("Error fetching tickets.");
   }
 });
 
