@@ -25,6 +25,7 @@ if (process.env.NODE_ENV !== "production") {
 import "./db/connection.js";
 import { EmailRoutes } from "./API/Routes/emailRoutes.js";
 import emailController from "./API/Controllers/emailController.js";
+import TicketModel from "./Database/models/EmailToken/ticketSchema.js";
 // import NotificationModel from "./Database/models/EmailToken/notificationSchema.js";
 
 app.use("/", EmailRoutes);
