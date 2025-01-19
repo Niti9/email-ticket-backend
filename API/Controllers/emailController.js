@@ -5,13 +5,12 @@ import TicketModel from "../../Database/models/EmailToken/ticketSchema.js";
 class EmailControllers {
   // Method to check if refresh token exists, and if it does, get the access token
   handleConsent = async (req, res) => {
-    const userId = req.query.user_id; // Assume user_id is sent from the frontend
+    const userId = req.query.user_id;
 
     if (!userId) {
       return res.status(400).send("User ID is required.");
     }
 
-    // Check if the refresh token exists in the database for this user
     const tokenRecord = await TokenModel.findOne({ user_id: userId });
 
     if (tokenRecord) {
@@ -19,44 +18,41 @@ class EmailControllers {
         const accessToken = await this.getAccessToken(
           tokenRecord.refresh_token
         );
-
-        // // // Automatically create a subscription after getting the access token
-        // const subscription = await this.createSubscription(
-        //   accessToken.access_token,
-        //   userId
-        // );
-
-        // console.log("subscriptions are", subscription);
-        // const Messages = await this.getMessage(accessToken.access_token);
-        // console.log("messages", Messages);
+        const subscription = await this.automaticSubscription(
+          userId,
+          accessToken.access_token
+        );
         return res.status(200).send({
+          subscription: subscription,
           access_token: accessToken.access_token,
           expires_in: accessToken.expires_in
-          // subscription_id: subscription.id
         });
       } catch (error) {
         console.error("Failed to fetch access token:", error);
         return res.status(500).send("Failed to fetch access token.");
       }
     } else {
-      console.log("No refresh token found. Redirecting to consent page...");
-      // Redirect user to consent page for OAuth authorization
       const redirectUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=Mail.Read offline_access&state=${userId}&prompt=consent`;
-      res.status(302).redirect(redirectUrl);
+      return res.status(200).send({ redirectUrl });
     }
   };
 
   // Callback to handle the token exchange after consent
   getEmailCode = async (req, res) => {
     try {
-      const code = req.query.code;
-      const userId = req.query.state; // State contains the user_id
+      // const code = req.query.code;
+      // const userId = req.query.state; // State contains the user_id
+      const { code, userId } = req.body;
 
       if (!code || !userId) {
         return res
           .status(400)
           .send("Authorization code or user ID not found in the callback URL.");
       }
+
+      // // res.redirect(
+      // //   `http://localhost:5173/integration/outlookcallback?code=${code}&state=${userId}`
+      // // );
 
       // Exchange the authorization code for refresh token
       const tokenResponse = await this.getRefreshToken(code);
@@ -69,7 +65,8 @@ class EmailControllers {
       );
 
       console.log("Tokens saved to database.");
-      res.send("Authorization successful. You can now log in.");
+      // res.send("Authorization successful. You can now log in.");
+      res.status(200).json({ success: true, data: tokenResponse });
     } catch (error) {
       console.error("Error in getEmailCode:", error.message);
       res
@@ -78,24 +75,61 @@ class EmailControllers {
     }
   };
 
-  // Exchange authorization code for a refresh token
+  // // Exchange authorization code for a refresh token
+  // getRefreshToken = async (code) => {
+  //   try {
+  //     const response = await axios.post(
+  //       "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+  //       new URLSearchParams({
+  //         client_id: process.env.CLIENT_ID,
+  //         client_secret: process.env.CLIENT_SECRET,
+  //         redirect_uri: process.env.REDIRECT_URI,
+  //         code: code,
+  //         grant_type: "authorization_code",
+  //         scope: "Mail.Read offline_access"
+  //       }).toString(),
+  //       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+  //     );
+
+  //     console.log("this is refresh token here", response.data);
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error exchanging code for refresh token:", error);
+  //     // console.error("Error exchanging code for refresh token:", error.message);
+  //     throw error;
+  //   }
+  // };
+
   getRefreshToken = async (code) => {
     try {
-      const response = await axios.post(
+      const response = await fetch(
         "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-        new URLSearchParams({
-          client_id: process.env.CLIENT_ID,
-          client_secret: process.env.CLIENT_SECRET,
-          redirect_uri: process.env.REDIRECT_URI,
-          code: code,
-          grant_type: "authorization_code",
-          scope: "Mail.Read offline_access"
-        }).toString(),
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: new URLSearchParams({
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET,
+            redirect_uri: process.env.REDIRECT_URI,
+            code: code,
+            grant_type: "authorization_code",
+            scope: "Mail.Read offline_access"
+          }).toString()
+        }
       );
 
-      console.log("this is refresh token here", response.data);
-      return response.data;
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(
+          `HTTP error! status: ${response.status}, message: ${errorMessage}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("This is the refresh token:", data);
+      return data;
     } catch (error) {
       console.error("Error exchanging code for refresh token:", error);
       // console.error("Error exchanging code for refresh token:", error.message);
@@ -103,28 +137,76 @@ class EmailControllers {
     }
   };
 
-  // Exchange refresh token for an access token
   getAccessToken = async (refreshToken) => {
     try {
-      const response = await axios.post(
+      const response = await fetch(
         "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-        new URLSearchParams({
-          client_id: process.env.CLIENT_ID,
-          client_secret: process.env.CLIENT_SECRET,
-          redirect_uri: process.env.REDIRECT_URI,
-          refresh_token: refreshToken,
-          grant_type: "refresh_token",
-          scope: "Mail.read"
-        }).toString(),
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: new URLSearchParams({
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET,
+            redirect_uri: process.env.REDIRECT_URI,
+            refresh_token: refreshToken,
+            grant_type: "refresh_token",
+            scope: "Mail.read"
+          }).toString()
+        }
       );
-
-      return response.data;
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(
+          `HTTP error! status: ${response.status}, message: ${errorMessage}`
+        );
+      }
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error(
         "Error exchanging refresh token for access token:",
         error.error_description
       );
+      throw error;
+    }
+  };
+
+  automaticSubscription = async (userId, accessToken) => {
+    try {
+      const response = await fetch(
+        "https://graph.microsoft.com/v1.0/subscriptions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            changeType: "created",
+            // notificationUrl: "https://email-ticket-backend.vercel.app/webhook",
+            notificationUrl:
+              "https://email-ticket-backend.vercel.app/api/ticket/tickets/webhook",
+            resource: "me/messages",
+            expirationDateTime: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
+            // clientState: "yourClientState"
+            clientState: userId
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(
+          `HTTP error! status: ${response.status}, message: ${errorMessage}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error creating subscription:", error.message);
       throw error;
     }
   };
@@ -211,6 +293,81 @@ class EmailControllers {
     } catch (error) {
       console.error("Error updating ticket:", error.message);
       res.status(500).send("Error updating ticket.");
+    }
+  };
+
+  webhook = async (req, res) => {
+    try {
+      // Handle validation token
+      if (req.query.validationToken) {
+        console.log("Validation Token Received:", req.query.validationToken);
+        return res.status(200).send(req.query.validationToken);
+      }
+
+      // Log the received notification
+      console.log("Notification Received:", req.body);
+
+      const notifications = req.body.value;
+      if (!notifications || notifications.length === 0) {
+        console.log("No notifications received.");
+        return res.status(204).send("No notifications received.");
+      }
+
+      for (const notification of notifications) {
+        // Extract email details
+
+        const userId = notification.clientState; // Assume user_id is sent from the frontend
+        const tokenRecord = await TokenModel.findOne({ user_id: userId });
+        const accessToken = await this.getAccessToken(
+          tokenRecord.refresh_token
+        ); // Get your OAuth token
+        const emailId = notification.resource.split("/").pop(); // Extract email ID from resource
+
+        // Check if the ticket already exists
+        const existingTicket = await TicketModel.findOne({ ticketId: emailId });
+        if (existingTicket) {
+          console.log(`Duplicate ticket detected for emailId: ${emailId}`);
+          continue; // Skip processing this notification
+        }
+        const emailResponse = await axios.get(
+          `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken.access_token}`
+            }
+          }
+        );
+
+        const emailData = emailResponse.data;
+
+        // Create ticket
+        const ticket = new TicketModel({
+          ticketId: `TCKT${Date.now()}`,
+          senderName: emailData.sender.emailAddress.name || "Unknown Sender",
+          senderEmail: emailData.sender.emailAddress.address,
+          queryDetails: emailData.subject || "No Subject",
+          priority: "Medium", // You can enhance this logic
+          assignedTo: "Unassigned",
+          status: "Open"
+        });
+
+        await ticket.save(); // Save ticket to the database
+      }
+
+      return res.status(202).send("Notifications processed.");
+    } catch (error) {
+      console.error("Error processing webhook:", error);
+      return res.status(500).send("Internal Server Error");
+    }
+  };
+
+  getallTickets = async (req, res) => {
+    try {
+      const tickets = await TicketModel.find({});
+      return res.status(200).json(tickets);
+    } catch (error) {
+      console.error("Error fetching tickets:", error.message);
+      res.status(500).send("Error fetching tickets.");
     }
   };
 }
