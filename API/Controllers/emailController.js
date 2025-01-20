@@ -18,10 +18,10 @@ class EmailControllers {
         const accessToken = await this.getAccessToken(
           tokenRecord.refresh_token
         );
-        const subscription = await this.automaticSubscription(
-          userId,
-          accessToken.access_token
-        );
+        // const subscription = await this.automaticSubscription(
+        //   userId,
+        //   accessToken.access_token
+        // );
         return res.status(200).send({
           // subscription: subscription,
           access_token: accessToken.access_token,
@@ -216,53 +216,53 @@ class EmailControllers {
     }
   };
 
-  // createSubscription = async (accessToken, userId) => {
-  createSubscription = async (req, res) => {
-    try {
-      // const accessToken = await getAccessToken();
-      // const emailController = new EmailControllers();
-      // const accessToken = await emailController.getAccessToken(refreshToken);
+  // // createSubscription = async (accessToken, userId) => {
+  // createSubscription = async (req, res) => {
+  //   try {
+  //     // const accessToken = await getAccessToken();
+  //     // const emailController = new EmailControllers();
+  //     // const accessToken = await emailController.getAccessToken(refreshToken);
 
-      // Check if the refresh token exists in the database for this user
-      const userId = req.query.user_id; // Assume user_id is sent from the frontend
-      const tokenRecord = await TokenModel.findOne({ user_id: userId });
-      const accessToken = await this.getAccessToken(tokenRecord.refresh_token);
-      console.log(
-        "This is acccess Token which we passed to create Subscription ......................",
-        userId,
-        tokenRecord,
-        accessToken.access_token
-      );
+  //     // Check if the refresh token exists in the database for this user
+  //     const userId = req.query.user_id; // Assume user_id is sent from the frontend
+  //     const tokenRecord = await TokenModel.findOne({ user_id: userId });
+  //     const accessToken = await this.getAccessToken(tokenRecord.refresh_token);
+  //     console.log(
+  //       "This is acccess Token which we passed to create Subscription ......................",
+  //       userId,
+  //       tokenRecord,
+  //       accessToken.access_token
+  //     );
 
-      const response = await axios.post(
-        "https://graph.microsoft.com/v1.0/subscriptions",
-        {
-          changeType: "created",
-          // notificationUrl: "https://your-vercel-project.vercel.app/webhook",
-          notificationUrl: "https://email-ticket-backend.vercel.app/webhook",
-          resource: "me/messages",
-          expirationDateTime: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
-          // clientState: "yourClientState"
-          clientState: userId
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken.access_token}`,
-            "Content-Type": "application/json"
-          }
-        }
-      );
+  //     const response = await axios.post(
+  //       "https://graph.microsoft.com/v1.0/subscriptions",
+  //       {
+  //         changeType: "created",
+  //         // notificationUrl: "https://your-vercel-project.vercel.app/webhook",
+  //         notificationUrl: "https://email-ticket-backend.vercel.app/webhook",
+  //         resource: "me/messages",
+  //         expirationDateTime: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
+  //         // clientState: "yourClientState"
+  //         clientState: userId
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken.access_token}`,
+  //           "Content-Type": "application/json"
+  //         }
+  //       }
+  //     );
 
-      // console.log("Subscription created:", response.data);
-      console.log("Subscription created:", response.data);
-      // console.log("Subscription initialized:", response.data.id);
-      // return response.data;
-      return res.status(200).json(response.data);
-    } catch (error) {
-      console.error("Error creating subscription:", error.response.data);
-      throw error;
-    }
-  };
+  //     // console.log("Subscription created:", response.data);
+  //     console.log("Subscription created:", response.data);
+  //     // console.log("Subscription initialized:", response.data.id);
+  //     // return response.data;
+  //     return res.status(200).json(response.data);
+  //   } catch (error) {
+  //     console.error("Error creating subscription:", error.response.data);
+  //     throw error;
+  //   }
+  // };
 
   getMessage = async (accessToken) => {
     try {
@@ -329,12 +329,12 @@ class EmailControllers {
         ); // Get your OAuth token
         const emailId = notification.resource.split("/").pop(); // Extract email ID from resource
 
-        // Check if the ticket already exists
-        const existingTicket = await TicketModel.findOne({ ticketId: emailId });
-        if (existingTicket) {
-          console.log(`Duplicate ticket detected for emailId: ${emailId}`);
-          continue; // Skip processing this notification
-        }
+        // // Check if the ticket already exists
+        // const existingTicket = await TicketModel.findOne({ ticketId: emailId });
+        // if (existingTicket) {
+        //   console.log(`Duplicate ticket detected for emailId: ${emailId}`);
+        //   continue; // Skip processing this notification
+        // }
         const emailResponse = await axios.get(
           `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
           {
@@ -345,6 +345,15 @@ class EmailControllers {
         );
 
         const emailData = emailResponse.data;
+        // Check if the ticket already exists
+        const existingTicket = await TicketModel.findOne({
+          queryDetails: emailData.subject
+        });
+        if (existingTicket) {
+          console.log(`Duplicate ticket detected for emailId: ${emailId}`);
+          continue; // Skip processing this notification
+        }
+        console.log("emailData is", emailData);
 
         // Create ticket
         const ticket = new TicketModel({
