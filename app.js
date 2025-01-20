@@ -107,16 +107,6 @@ EmailRoutes.post("/api/ticket/tickets/webhook", emailController.webhook);
 EmailRoutes.get("/api/ticket/tickets", emailController.getallTickets);
 EmailRoutes.put("/api/ticket/tickets/:id", emailController.EditTicket);
 
-// app.get("/tickets", async (req, res) => {
-//   try {
-//     const tickets = await TicketModel.find({});
-//     return res.status(200).json(tickets);
-//   } catch (error) {
-//     console.error("Error fetching tickets:", error.message);
-//     res.status(500).send("Error fetching tickets.");
-//   }
-// });
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
