@@ -23,7 +23,7 @@ class EmailControllers {
           accessToken.access_token
         );
         return res.status(200).send({
-          subscription: subscription,
+          // subscription: subscription,
           access_token: accessToken.access_token,
           expires_in: accessToken.expires_in
         });
@@ -62,6 +62,11 @@ class EmailControllers {
         { user_id: userId },
         { refresh_token: tokenResponse.refresh_token },
         { upsert: true }
+      );
+
+      const subscription = await this.automaticSubscription(
+        userId,
+        tokenResponse.access_token
       );
 
       console.log("Tokens saved to database.");
@@ -318,6 +323,7 @@ class EmailControllers {
 
         const userId = notification.clientState; // Assume user_id is sent from the frontend
         const tokenRecord = await TokenModel.findOne({ user_id: userId });
+        console.log("this is token Record data ", tokenRecord);
         const accessToken = await this.getAccessToken(
           tokenRecord.refresh_token
         ); // Get your OAuth token
