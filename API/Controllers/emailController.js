@@ -363,6 +363,8 @@ class EmailControllers {
           senderName: emailData.sender.emailAddress.name || "Unknown Sender",
           senderEmail: emailData.sender.emailAddress.address,
           queryDetails: emailData.subject || "No Subject",
+          bodyPreview: emailData.bodyPreview,
+          body: emailData.body.content || "Body is Empty",
           priority: "Medium", // You can enhance this logic
           assignedTo: "Unassigned",
           status: "Open"

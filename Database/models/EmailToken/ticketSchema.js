@@ -8,7 +8,7 @@ const ticketSchema = new mongoose.Schema({
   priority: { type: String, default: "Medium" }, // Default priority
   assignedTo: { type: String, default: "Unassigned" },
   status: { type: String, default: "Open" },
-  bodyPreview: { type: String, required: true },
+  bodyPreview: { type: String },
   body: {
     content: { type: String, required: true } // Only save the content
   },
