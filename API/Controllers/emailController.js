@@ -301,85 +301,242 @@ class EmailControllers {
     }
   };
 
-  webhook = async (req, res) => {
-    try {
-      // Handle validation token
-      if (req.query.validationToken) {
-        console.log("Validation Token Received:", req.query.validationToken);
-        return res.status(200).send(req.query.validationToken);
-      }
+  // webhook = async (req, res) => {
+  //   try {
+  //     // Handle validation token
+  //     if (req.query.validationToken) {
+  //       console.log("Validation Token Received:", req.query.validationToken);
+  //       return res.status(200).send(req.query.validationToken);
+  //     }
 
-      // Log the received notification
-      console.log("Notification Received:", req.body);
+  //     // Log the received notification
+  //     console.log("Notification Received:", req.body);
 
-      const notifications = req.body.value;
-      if (!notifications || notifications.length === 0) {
-        console.log("No notifications received.");
-        return res.status(204).send("No notifications received.");
-      }
+  //     const notifications = req.body.value;
+  //     if (!notifications || notifications.length === 0) {
+  //       console.log("No notifications received.");
+  //       return res.status(204).send("No notifications received.");
+  //     }
 
-      for (const notification of notifications) {
+  //     for (const notification of notifications) {
+  //       // Extract email details
+
+  //       const userId = notification.clientState; // Assume user_id is sent from the frontend
+  //       const tokenRecord = await TokenModel.findOne({ user_id: userId });
+  //       console.log("this is token Record data ", tokenRecord);
+  //       const accessToken = await this.getAccessToken(
+  //         tokenRecord.refresh_token
+  //       ); // Get your OAuth token
+  //       const emailId = notification.resource.split("/").pop(); // Extract email ID from resource
+
+  //       const emailResponse = await axios.get(
+  //         `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${accessToken.access_token}`
+  //           }
+  //         }
+  //       );
+
+  //       const emailData = emailResponse.data;
+  //       const conversationId = emailData.conversationId; // Extract conversationId from the email data
+
+  //       const existingTicket = await TicketModel.findOne({
+  //         $or: [
+  //           { emailId: emailId }, // Check if the email ID is already present
+  //           { queryDetails: emailData.subject } // Check if the subject matches (or content in your case)
+  //         ]
+  //       });
+
+  //       // Check if the conversation already exists in the database
+  //       const sameConversationId = await TicketModel.findOne({
+  //         conversationId
+  //       });
+
+  //       if (existingTicket) {
+  //         console.log(`Duplicate ticket detected for emailId: ${emailId}`);
+  //         continue; // Skip processing this notification
+  //       }
+
+  //       if (sameConversationId) {
+  //         // If the conversation already exists, update the comments array
+  //         console.log(
+  //           `Adding a reply to the existing conversation for conversationId: ${conversationId}`
+  //         );
+
+  //         sameConversationId.comments.push({
+  //           senderName: emailData.sender.emailAddress.name || "Unknown Sender",
+  //           senderEmail: emailData.sender.emailAddress.address,
+  //           content: emailData.body.content || "No content", // Reply content
+  //           role:
+  //             emailData.sender.emailAddress.address ===
+  //             "nitinnoyt829@outlook.com"
+  //               ? "admin"
+  //               : "user", // Determine role based on sender
+  //           sentAt: new Date()
+  //         });
+
+  //         await sameConversationId.save();
+  //       } else {
+  //         // If this is the first email in the conversation, create a new ticket
+  //         console.log(
+  //           `Creating a new ticket for conversationId: ${conversationId}`
+  //         );
+
+  //         const ticket = new TicketModel({
+  //           conversationId: conversationId,
+  //           ticketId: emailId,
+  //           senderName: emailData.sender.emailAddress.name || "Unknown Sender",
+  //           senderEmail: emailData.sender.emailAddress.address,
+  //           queryDetails: emailData.subject || "No Subject",
+  //           body: emailData.body.content || "No content",
+  //           comments: [], // Initialize with no comments
+  //           priority: "Medium",
+  //           assignedTo: "Unassigned",
+  //           status: "Open"
+  //         });
+
+  //         await ticket.save();
+  //       }
+  //     }
+  //     //   // Create ticket
+  //     //   const ticket = new TicketModel({
+  //     //     ticketId: emailId,
+  //     //     senderName: emailData.sender.emailAddress.name || "Unknown Sender",
+  //     //     senderEmail: emailData.sender.emailAddress.address,
+  //     //     queryDetails: emailData.subject || "No Subject",
+  //     //     bodyPreview: emailData.bodyPreview,
+  //     //     // body: emailData.body.content || "Body is Empty",
+  //     //     body: { content: emailData.body.content || "Body is Empty" },
+  //     //     priority: "Medium", // You can enhance this logic
+  //     //     assignedTo: "Unassigned",
+  //     //     status: "Open"
+  //     //   });
+
+  //     //   await ticket.save(); // Save ticket to the database
+  //     // }
+
+  //     return res.status(202).send("Notifications processed.");
+  //   } catch (error) {
+  //     console.error("Error processing webhook:", error);
+  //     return res.status(500).send("Internal Server Error");
+  //   }
+  // };
+
+
+
+
+  const webhook = async (req, res) => {
+  try {
+    // Handle validation token
+    if (req.query.validationToken) {
+      console.log("Validation Token Received:", req.query.validationToken);
+      return res.status(200).send(req.query.validationToken);
+    }
+
+    // Log the received notification
+    console.log("Notification Received:", req.body);
+
+    const notifications = req.body.value;
+    if (!notifications || notifications.length === 0) {
+      console.log("No notifications received.");
+      return res.status(204).send("No notifications received.");
+    }
+
+    for (const notification of notifications) {
+      try {
         // Extract email details
-
         const userId = notification.clientState; // Assume user_id is sent from the frontend
         const tokenRecord = await TokenModel.findOne({ user_id: userId });
-        console.log("this is token Record data ", tokenRecord);
-        const accessToken = await this.getAccessToken(
-          tokenRecord.refresh_token
-        ); // Get your OAuth token
+
+        if (!tokenRecord) {
+          console.warn(`No token record found for user_id: ${userId}`);
+          continue; // Skip this notification if no token is found
+        }
+
+        const accessToken = await this.getAccessToken(tokenRecord.refresh_token); // Get your OAuth token
         const emailId = notification.resource.split("/").pop(); // Extract email ID from resource
 
+        // Fetch email details from Microsoft Graph API
         const emailResponse = await axios.get(
           `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
           {
             headers: {
-              Authorization: `Bearer ${accessToken.access_token}`
-            }
+              Authorization: `Bearer ${accessToken.access_token}`,
+            },
           }
         );
 
         const emailData = emailResponse.data;
-        // // Check if the ticket already exists
-        // const existingTicket = await TicketModel.findOne({
-        //   queryDetails: emailData.subject
-        // });
-        // Check for duplicates based on emailId or content (subject)
-        const existingTicket = await TicketModel.findOne({
-          $or: [
-            { emailId: emailId }, // Check if the email ID is already present
-            { queryDetails: emailData.subject } // Check if the subject matches (or content in your case)
-          ]
-        });
-        if (existingTicket) {
-          console.log(`Duplicate ticket detected for emailId: ${emailId}`);
-          continue; // Skip processing this notification
-        }
-        // console.log("emailData is", emailData);
+        const conversationId = emailData.conversationId; // Extract conversationId from the email data
 
-        // Create ticket
-        const ticket = new TicketModel({
-          // ticketId: `TCKT${Date.now()}`,
+        // Check for duplicate tickets by `emailId` or `conversationId`
+        const existingTicket = await TicketModel.findOne({
+          $or: [{ emailId }, { conversationId }],
+        });
+
+        if (existingTicket) {
+          console.log(
+            `Duplicate ticket detected for emailId: ${emailId} or conversationId: ${conversationId}`
+          );
+
+          // If conversation exists, update comments
+          if (existingTicket.conversationId === conversationId) {
+            console.log(
+              `Adding a reply to the existing conversation for conversationId: ${conversationId}`
+            );
+
+            existingTicket.comments.push({
+              senderName: emailData.sender.emailAddress.name || "Unknown Sender",
+              senderEmail: emailData.sender.emailAddress.address,
+              content: emailData.body.content || "No content", // Reply content
+              role:
+                emailData.sender.emailAddress.address ===
+                "nitinnoyt829@outlook.com"
+                  ? "admin"
+                  : "user", // Determine role based on sender
+              sentAt: new Date(),
+            });
+
+            await existingTicket.save();
+          }
+
+          continue; // Skip processing this notification further
+        }
+
+        // Create a new ticket if no existing ticket or conversation is found
+        console.log(
+          `Creating a new ticket for conversationId: ${conversationId}`
+        );
+
+        const newTicket = new TicketModel({
+          conversationId: conversationId,
           ticketId: emailId,
           senderName: emailData.sender.emailAddress.name || "Unknown Sender",
           senderEmail: emailData.sender.emailAddress.address,
           queryDetails: emailData.subject || "No Subject",
-          bodyPreview: emailData.bodyPreview,
-          // body: emailData.body.content || "Body is Empty",
-          body: { content: emailData.body.content || "Body is Empty" },
-          priority: "Medium", // You can enhance this logic
+          body: emailData.body.content || "No content",
+          comments: [], // Initialize with no comments
+          priority: "Medium",
           assignedTo: "Unassigned",
-          status: "Open"
+          status: "Open",
         });
 
-        await ticket.save(); // Save ticket to the database
+        await newTicket.save();
+      } catch (notificationError) {
+        console.error(
+          `Error processing notification for emailId: ${notification.resource.split("/").pop()}`,
+          notificationError
+        );
       }
-
-      return res.status(202).send("Notifications processed.");
-    } catch (error) {
-      console.error("Error processing webhook:", error);
-      return res.status(500).send("Internal Server Error");
     }
-  };
+
+    return res.status(202).send("Notifications processed.");
+  } catch (error) {
+    console.error("Error processing webhook:", error);
+    return res.status(500).send("Internal Server Error");
+  }
+};
 
   getallTickets = async (req, res) => {
     try {

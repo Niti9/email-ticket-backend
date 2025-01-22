@@ -12,6 +12,17 @@ const ticketSchema = new mongoose.Schema({
   body: {
     content: { type: String, required: true } // Only save the content
   },
+  conversationId: { type: String, required: true }, // Identify conversations
+  comments: [
+    {
+      senderName: { type: String, required: true },
+      senderEmail: { type: String, required: true },
+      content: { type: String, required: true },
+      role: { type: String, enum: ["admin", "user"], required: true },
+      sentAt: { type: Date, default: Date.now }
+    }
+  ],
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
