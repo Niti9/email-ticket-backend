@@ -364,7 +364,8 @@ class EmailControllers {
           senderEmail: emailData.sender.emailAddress.address,
           queryDetails: emailData.subject || "No Subject",
           bodyPreview: emailData.bodyPreview,
-          body: emailData.body.content || "Body is Empty",
+          // body: emailData.body.content || "Body is Empty",
+          body: { content: emailData.body.content || "Body is Empty" },
           priority: "Medium", // You can enhance this logic
           assignedTo: "Unassigned",
           status: "Open"
