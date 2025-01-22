@@ -515,7 +515,8 @@ class EmailControllers {
             senderName: emailData.sender.emailAddress.name || "Unknown Sender",
             senderEmail: emailData.sender.emailAddress.address,
             queryDetails: emailData.subject || "No Subject",
-            body: emailData.body.content || "No content",
+            // body: emailData.body.content || "No content",
+            body: { content: emailData.body.content || "Body is Empty" },
             comments: [], // Initialize with no comments
             priority: "Medium",
             assignedTo: "Unassigned",
