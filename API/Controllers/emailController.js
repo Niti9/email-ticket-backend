@@ -329,12 +329,6 @@ class EmailControllers {
         ); // Get your OAuth token
         const emailId = notification.resource.split("/").pop(); // Extract email ID from resource
 
-        // // Check if the ticket already exists
-        // const existingTicket = await TicketModel.findOne({ ticketId: emailId });
-        // if (existingTicket) {
-        //   console.log(`Duplicate ticket detected for emailId: ${emailId}`);
-        //   continue; // Skip processing this notification
-        // }
         const emailResponse = await axios.get(
           `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
           {
@@ -345,19 +339,27 @@ class EmailControllers {
         );
 
         const emailData = emailResponse.data;
-        // Check if the ticket already exists
+        // // Check if the ticket already exists
+        // const existingTicket = await TicketModel.findOne({
+        //   queryDetails: emailData.subject
+        // });
+        // Check for duplicates based on emailId or content (subject)
         const existingTicket = await TicketModel.findOne({
-          queryDetails: emailData.subject
+          $or: [
+            { emailId: emailId }, // Check if the email ID is already present
+            { queryDetails: emailData.subject } // Check if the subject matches (or content in your case)
+          ]
         });
         if (existingTicket) {
           console.log(`Duplicate ticket detected for emailId: ${emailId}`);
           continue; // Skip processing this notification
         }
-        console.log("emailData is", emailData);
+        // console.log("emailData is", emailData);
 
         // Create ticket
         const ticket = new TicketModel({
-          ticketId: `TCKT${Date.now()}`,
+          // ticketId: `TCKT${Date.now()}`,
+          ticketId: emailId,
           senderName: emailData.sender.emailAddress.name || "Unknown Sender",
           senderEmail: emailData.sender.emailAddress.address,
           queryDetails: emailData.subject || "No Subject",
