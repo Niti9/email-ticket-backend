@@ -471,7 +471,7 @@ class EmailControllers {
 
           // Check for duplicate tickets by `emailId` or `conversationId`
           const existingTicket = await TicketModel.findOne({
-            $or: [{ emailId }, { conversationId }]
+            $or: [{ ticketId: emailId }, { conversationId }]
           });
 
           if (existingTicket) {
