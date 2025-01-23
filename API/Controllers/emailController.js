@@ -485,7 +485,20 @@ class EmailControllers {
                 `Adding a reply to the existing conversation for conversationId: ${conversationId}`
               );
 
+              // Check if the comment already exists based on `emailId`
+              const isDuplicateComment = existingTicket.comments.some(
+                (comment) => comment.commentId === emailId
+              );
+
+              if (isDuplicateComment) {
+                console.log(
+                  `Duplicate comment detected id==> ${conversationId}`
+                );
+                continue; // Skip adding this duplicate comment
+              }
+
               existingTicket.comments.push({
+                commentId: emailData.id,
                 senderName:
                   emailData.sender.emailAddress.name || "Unknown Sender",
                 senderEmail: emailData.sender.emailAddress.address,

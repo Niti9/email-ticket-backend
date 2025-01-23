@@ -15,6 +15,7 @@ const ticketSchema = new mongoose.Schema({
   conversationId: { type: String, required: true }, // Identify conversations
   comments: [
     {
+      commentId: { type: String, required: true, unique: true }, // Unique ID for each comment
       senderName: { type: String, required: true },
       senderEmail: { type: String, required: true },
       content: { type: String, required: true },
