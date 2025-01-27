@@ -523,7 +523,7 @@ class EmailControllers {
           );
 
           const newTicket = new TicketModel({
-            userId: userId,
+            userId: tokenRecord._id,
             conversationId: conversationId,
             ticketId: emailId,
             senderName: emailData.sender.emailAddress.name || "Unknown Sender",
