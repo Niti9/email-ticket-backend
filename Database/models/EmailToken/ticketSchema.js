@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const ticketSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "EmailToken",
+    required: true
+  },
   ticketId: { type: String, required: true, unique: true },
   senderName: { type: String, required: true },
   senderEmail: { type: String, required: true },
@@ -19,7 +24,8 @@ const ticketSchema = new mongoose.Schema({
       senderName: { type: String, required: true },
       senderEmail: { type: String, required: true },
       content: { type: String, required: true },
-      role: { type: String, enum: ["admin", "user"], required: true },
+      // role: { type: String, enum: ["admin", "user"], required: true },
+      role: { type: String, enum: ["admin", "user"] },
       sentAt: { type: Date, default: Date.now }
     }
   ],
