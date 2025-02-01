@@ -6,12 +6,22 @@ const ticketSchema = new mongoose.Schema({
     ref: "EmailToken",
     required: true
   },
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Member",
+    default: null
+  },
+  department: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Department",
+    default: null
+  },
   ticketId: { type: String, required: true, unique: true },
   senderName: { type: String, required: true },
   senderEmail: { type: String, required: true },
   queryDetails: { type: String, required: true },
   priority: { type: String, default: "Medium" }, // Default priority
-  assignedTo: { type: String, default: "Unassigned" },
+  // assignedTo: { type: String, default: "Unassigned" },
   status: { type: String, default: "Open" },
   bodyPreview: { type: String },
   body: {
