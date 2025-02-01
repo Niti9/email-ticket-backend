@@ -533,7 +533,7 @@ class EmailControllers {
             body: { content: emailData.body.content || "Body is Empty" },
             comments: [], // Initialize with no comments
             priority: "Medium",
-            assignedTo: "Unassigned",
+            // assignedTo: "Unassigned",
             status: "Open"
           });
 
