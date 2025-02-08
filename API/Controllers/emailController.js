@@ -551,6 +551,25 @@ class EmailControllers {
 
           await newTicket.save();
           // // **Send Confirmation Email & Update DB**
+          const mailSent = await MicrosoftOutlookService.sendConfirmationEmail(
+            accessToken.access_token,
+            senderEmail,
+            newTicket.ticketId
+          );
+
+          console.log("mailSent are `````````````````````````", mailSent);
+          if (mailSent) {
+            // Update responseMail status in DB
+            await TicketModel.updateOne(
+              { _id: newTicket._id },
+              { responseMail: mailSent }
+            );
+          } else {
+            console.log("mail not sent please check code again");
+            continue;
+          }
+
+          // // **Send Confirmation Email & Update DB**
           // const mailSent = await MicrosoftOutlookService.sendConfirmationEmail(
           //   accessToken.access_token,
           //   senderEmail,

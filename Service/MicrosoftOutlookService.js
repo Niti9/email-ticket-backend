@@ -5,25 +5,25 @@ class MicrosoftOutlookServices {
   sendConfirmationEmail = async (accessToken, userEmail, ticketId) => {
     try {
       // Get Admin Email Dynamically
-      const adminResponse = await fetch("https://graph.microsoft.com/v1.0/me", {
-        method: "GET",
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
+      // const adminResponse = await fetch("https://graph.microsoft.com/v1.0/me", {
+      //   method: "GET",
+      //   headers: { Authorization: `Bearer ${accessToken}` }
+      // });
 
-      if (!adminResponse.ok) {
-        throw new Error(
-          `Failed to fetch admin email: ${adminResponse.statusText}`
-        );
-      }
+      // if (!adminResponse.ok) {
+      //   throw new Error(
+      //     `Failed to fetch admin email: ${adminResponse.statusText}`
+      //   );
+      // }
 
-      const adminData = await adminResponse.json();
-      const adminEmail = adminData.mail || adminData.userPrincipalName;
-      console.log("admin mail is adminEmail", adminEmail);
+      // const adminData = await adminResponse.json();
+      // const adminEmail = adminData.mail || adminData.userPrincipalName;
+      // console.log("admin mail is adminEmail", adminEmail);
 
-      if (!adminEmail) {
-        console.log("No admin email found");
-        return { success: false, message: "No admin email found" };
-      }
+      // if (!adminEmail) {
+      //   console.log("No admin email found");
+      //   return { success: false, message: "No admin email found" };
+      // }
 
       // Email Body
       const emailBody = {
@@ -33,8 +33,8 @@ class MicrosoftOutlookServices {
             contentType: "Text",
             content: `We have received your request. Your Ticket ID is '${ticketId}'. We will resolve your issue as soon as possible.`
           },
-          toRecipients: [{ emailAddress: { address: userEmail } }],
-          ccRecipients: [{ emailAddress: { address: adminEmail } }]
+          toRecipients: [{ emailAddress: { address: userEmail } }]
+          // ccRecipients: [{ emailAddress: { address: adminEmail } }]
         },
         saveToSentItems: "true"
       };
