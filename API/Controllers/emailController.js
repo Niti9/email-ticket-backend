@@ -627,7 +627,7 @@ cron.schedule("0 0 */6 * *", async () => {
         const newAccessToken = await value.getAccessToken(refresh_token); // Refresh token logic
         const response = await MicrosoftOutlookService.automaticSubscription(
           user_id,
-          newAccessToken.data.access_token,
+          newAccessToken.access_token,
           false,
           true
         );
