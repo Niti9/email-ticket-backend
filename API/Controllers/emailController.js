@@ -325,91 +325,99 @@ class EmailControllers {
         console.log("No notifications received.");
         return res.status(204).send("No notifications received.");
       }
-      for (const notification of notifications) {
-        try {
-          console.log(
-            "notification are```````````````````````````````",
-            notification
-          );
-          const userId = notification.clientState;
-          if (!userId) {
-            console.warn("Missing userId in notification.");
-            continue;
-          }
-
-          // Fetch token record
-          const tokenRecord = await TokenModel.findOne({ user_id: userId });
-          if (!tokenRecord) {
-            console.warn(`No token record found for user_id: ${userId}`);
-            continue;
-          }
-
-          // Get Access Token
-          const accessToken = await this.getAccessToken(
-            tokenRecord.refresh_token
-          );
-          if (!accessToken?.access_token) {
-            console.error("Failed to retrieve access token.");
-            continue;
-          }
-
-          // Extract email ID
-          const emailId = notification.resource.split("/").pop();
-          if (!emailId) {
-            console.error("Invalid emailId in notification.");
-            continue;
-          }
-
-          console.log("emailId is emailId ==========================", emailId);
-
-          // Fetch email details from Microsoft Graph API
-          const emailResponse = await MicrosoftOutlookService.fetchEmailDetails(
-            emailId,
-            accessToken.access_token
-          );
-
-          console.log(
-            "emailResponse is this '''''''''''''''''''''''''''''''''''''''''''''''''''''''",
-            emailResponse
-          );
-
-          const emailData = emailResponse.data;
-          const conversationId = emailData.conversationId; // Extract conversationId from the email data
-          const senderEmail = emailData.sender.emailAddress.address;
-          const senderName =
-            emailData.sender.emailAddress.name || "Unknown Sender";
-
-          // Check if the email already exists in the database
-          const existingTicket = await TicketModel.findOne({
-            $or: [{ emailId }, { conversationId: emailId }]
-          });
-          console.log(
-            "existing Ticket are here ->>>>>>>>>>>>>>>>>>>>>>>>",
-            existingTicket
-          );
-
-          if (existingTicket) {
-            console.log(`Duplicate ticket detected for emailId: ${emailId}`);
-
-            // Prevent duplicate comments
-            const isDuplicateComment = existingTicket.comments.some(
-              (comment) => comment.commentId === conversationId
+      await Promise.all(
+        notifications.map(async (notification) => {
+          try {
+            console.log(
+              "notification are```````````````````````````````",
+              notification
             );
-            if (isDuplicateComment) {
-              console.log(`Duplicate comment detected for emailId: ${emailId}`);
-              continue;
+            const userId = notification.clientState;
+            if (!userId) {
+              console.warn("Missing userId in notification.");
+              return;
             }
+
+            // Fetch token record
+            const tokenRecord = await TokenModel.findOne({ user_id: userId });
+            if (!tokenRecord) {
+              console.warn(`No token record found for user_id: ${userId}`);
+              return;
+            }
+
+            // Get Access Token
+            const accessToken = await this.getAccessToken(
+              tokenRecord.refresh_token
+            );
+            if (!accessToken?.access_token) {
+              console.error("Failed to retrieve access token.");
+              return;
+            }
+
+            // Extract email ID
+            const emailId = notification.resource.split("/").pop();
+            if (!emailId) {
+              console.error("Invalid emailId in notification.");
+              return;
+            }
+
+            console.log(
+              "emailId is emailId ==========================",
+              emailId
+            );
+
+            // Fetch email details from Microsoft Graph API
+            const emailResponse =
+              await MicrosoftOutlookService.fetchEmailDetails(
+                emailId,
+                accessToken.access_token
+              );
+
+            console.log(
+              "emailResponse is this '''''''''''''''''''''''''''''''''''''''''''''''''''''''",
+              emailResponse
+            );
+
+            const emailData = emailResponse.data;
+            const conversationId = emailData.conversationId; // Extract conversationId from the email data
+            const senderEmail = emailData.sender.emailAddress.address;
+            const senderName =
+              emailData.sender.emailAddress.name || "Unknown Sender";
+
+            // Check if the email already exists in the database
+            const existingTicket = await TicketModel.findOne({
+              $or: [{ emailId }, { conversationId: emailId }]
+            });
+            console.log(
+              "existing Ticket are here ->>>>>>>>>>>>>>>>>>>>>>>>",
+              existingTicket
+            );
+
+            if (existingTicket) {
+              console.log(`Duplicate ticket detected for emailId: ${emailId}`);
+
+              // Prevent duplicate comments
+              const isDuplicateComment = existingTicket.comments.some(
+                (comment) => comment.commentId === conversationId
+              );
+              if (isDuplicateComment) {
+                console.log(
+                  `Duplicate comment detected for emailId: ${emailId}`
+                );
+                return;
+              }
+            }
+          } catch (error) {
+            console.error("Error processing notification for emailId:", error);
+            console.log(
+              `notification resource error ${notification.resource
+                .split("/")
+                .pop()}`,
+              error
+            );
           }
-        } catch (error) {
-          console.error("Error processing notification for emailId:");
-          console.log(
-            `notification resource error ${notification.resource
-              .split("/")
-              .pop()}`,
-            error
-          );
-        }
-      }
+        })
+      );
 
       return res.status(202).send("Notifications processed.");
     } catch (error) {
