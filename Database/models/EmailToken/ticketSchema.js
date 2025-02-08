@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { TokenModel } from "./emailTokenSchema";
+import { TokenModel } from "./emailTokenSchema.js";
 
 const ticketSchema = new mongoose.Schema({
   userId: {
