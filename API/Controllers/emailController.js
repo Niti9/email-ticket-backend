@@ -455,6 +455,22 @@ class EmailControllers {
               status: "Open"
             });
             await newTicket.save();
+            // // Send confirmation email
+            const mailSent =
+              await MicrosoftOutlookService.sendConfirmationEmail(
+                accessToken.access_token,
+                emailData.sender.emailAddress.address,
+                newTicket.ticketId
+              );
+
+            if (mailSent.success) {
+              await TicketModel.updateOne(
+                { _id: newTicket._id },
+                { responseMail: true }
+              );
+            } else {
+              console.error("Failed to send confirmation email.");
+            }
           } catch (error) {
             console.error("Error processing notification for emailId:", error);
             console.log(
