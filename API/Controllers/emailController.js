@@ -66,9 +66,10 @@ class EmailControllers {
         { upsert: true }
       );
 
-      const subscription = await this.automaticSubscription(
+      const subscription = await MicrosoftOutlookService.automaticSubscription(
         userId,
-        tokenResponse.access_token
+        tokenResponse.data.access_token,
+        true
       );
 
       console.log("Tokens saved to database.");
@@ -577,6 +578,11 @@ class EmailControllers {
               .pop()}`,
             notificationError
           );
+          return res.status(400).json({
+            success: false,
+            message: "Duplicate commentId detected or other error occurred",
+            error: notificationError.message
+          });
         }
       }
 
@@ -617,12 +623,14 @@ cron.schedule("*/1 * * * *", async () => {
         const value = new EmailControllers();
 
         const newAccessToken = await value.getAccessToken(refresh_token); // Refresh token logic
-        const response = await value.automaticSubscription(
+        const response = await MicrosoftOutlookService.automaticSubscription(
           user_id,
-          newAccessToken.access_token
+          newAccessToken.data.access_token,
+          false,
+          true
         );
 
-        if (response.clientState === user_id) {
+        if (response.data.clientState === user_id) {
           console.log(`✅ Subscription renewed for user ${user_id}`);
         } else {
           console.log(

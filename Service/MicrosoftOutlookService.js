@@ -2,6 +2,76 @@
 // import OutlookRepo from "../Database/repository/OutlookRepo.js";
 
 class MicrosoftOutlookServices {
+  automaticSubscription = async (
+    userId,
+    accessToken,
+    firstTime = false,
+    cronTime = false
+  ) => {
+    try {
+      let expirationDateTime;
+
+      // Set expiration based on whether it's the first time or cron renewal
+      if (firstTime) {
+        // For first-time subscription, 7 days from now
+        expirationDateTime = new Date(
+          Date.now() + 7 * 24 * 60 * 60 * 1000
+        ).toISOString(); // 7 days from now
+      } else if (cronTime) {
+        // For renewal, 6 days from now
+        expirationDateTime = new Date(
+          Date.now() + 6 * 24 * 60 * 60 * 1000
+        ).toISOString(); // 6 days from now
+      } else {
+        // Default fallback: 1 minute (for testing purposes)
+        // expirationDateTime = new Date(Date.now() + 60000).toISOString(); // 1 minute from now
+        const message = "expiration time is not defined";
+        return message;
+      }
+
+      const response = await fetch(
+        "https://graph.microsoft.com/v1.0/subscriptions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            changeType: "created",
+            notificationUrl:
+              // "https://email-ticket-backend.vercel.app/api/ticket/tickets/webhook",
+              process.env.NOTIFICATION_URL,
+            resource: "me/messages",
+            expirationDateTime: expirationDateTime,
+            clientState: userId
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        return {
+          success: false,
+          status: response.status,
+          message: errorMessage,
+          data: null
+        };
+      }
+
+      const data = await response.json();
+
+      return {
+        success: true,
+        message: "Subscription created successfully",
+        data: data
+      };
+    } catch (error) {
+      console.error("Error creating subscription:", error.message);
+      throw error;
+    }
+  };
+
   sendConfirmationEmail = async (accessToken, userEmail, ticketId) => {
     try {
       // Get Admin Email Dynamically
