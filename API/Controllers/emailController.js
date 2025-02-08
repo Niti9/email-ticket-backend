@@ -361,6 +361,24 @@ class EmailControllers {
           }
 
           console.log("emailId is emailId ==========================", emailId);
+
+          // Fetch email details from Microsoft Graph API
+          const emailResponse = await MicrosoftOutlookService.fetchEmailDetails(
+            emailId,
+            accessToken.access_token
+          );
+
+          console.log(
+            "emailResponse is this '''''''''''''''''''''''''''''''''''''''''''''''''''''''",
+            emailResponse
+          );
+
+          const emailData = emailResponse.data;
+          const conversationId = emailData.conversationId; // Extract conversationId from the email data
+          const senderEmail = emailData.sender.emailAddress.address;
+          const senderName =
+            emailData.sender.emailAddress.name || "Unknown Sender";
+
           // Check if the email already exists in the database
           const existingTicket = await TicketModel.findOne({
             $or: [{ emailId }, { conversationId: emailId }]
@@ -375,7 +393,7 @@ class EmailControllers {
 
             // Prevent duplicate comments
             const isDuplicateComment = existingTicket.comments.some(
-              (comment) => comment.commentId === emailId
+              (comment) => comment.commentId === conversationId
             );
             if (isDuplicateComment) {
               console.log(`Duplicate comment detected for emailId: ${emailId}`);
