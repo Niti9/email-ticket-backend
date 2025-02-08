@@ -320,7 +320,6 @@ class EmailControllers {
       }
 
       console.log("Notification Received:", req.body);
-
       const notifications = req.body.value;
       if (!notifications || notifications.length === 0) {
         console.log("No notifications received.");
@@ -329,7 +328,6 @@ class EmailControllers {
 
       for (const notification of notifications) {
         try {
-          // Extract userId from clientState
           const userId = notification.clientState;
           if (!userId) {
             console.warn("Missing userId in notification.");
@@ -359,34 +357,40 @@ class EmailControllers {
             continue;
           }
 
-          // Check for duplicate ticket before fetching email
-          const existingTicket = await TicketModel.findOne({
+          // Check if the email already exists in the database
+          let existingTicket = await TicketModel.findOne({
             $or: [{ emailId }, { conversationId: emailId }]
           });
+
+          // Fetch email details
+          const emailData = await MicrosoftOutlookService.fetchEmailDetails(
+            emailId,
+            accessToken.access_token
+          );
+          if (!emailData) {
+            console.log("Email data not found.");
+            continue;
+          }
+
+          // Ensure `commentId` is always set
+          const commentId =
+            emailData.id || new mongoose.Types.ObjectId().toString();
 
           if (existingTicket) {
             console.log(`Duplicate ticket detected for emailId: ${emailId}`);
 
-            // Prevent duplicate comment
+            // Prevent duplicate comments
             const isDuplicateComment = existingTicket.comments.some(
-              (comment) => comment.commentId === emailId
+              (comment) => comment.commentId === commentId
             );
-
             if (isDuplicateComment) {
               console.log(`Duplicate comment detected for emailId: ${emailId}`);
               continue;
             }
 
-            // Fetch email details
-            const emailData = await MicrosoftOutlookService.fetchEmailDetails(
-              emailId,
-              accessToken.access_token
-            );
-            if (!emailData) continue;
-
             // Add comment to existing ticket
             existingTicket.comments.push({
-              commentId: emailData.id,
+              commentId,
               senderName:
                 emailData.sender.emailAddress.name || "Unknown Sender",
               senderEmail: emailData.sender.emailAddress.address,
@@ -403,14 +407,7 @@ class EmailControllers {
             continue;
           }
 
-          // Fetch email details for new ticket
-          const emailData = await MicrosoftOutlookService.fetchEmailDetails(
-            emailId,
-            accessToken.access_token
-          );
-          if (!emailData) continue;
-
-          // Create a new ticket
+          // Create a new ticket if it does not exist
           const newTicket = new TicketModel({
             userId: tokenRecord._id,
             conversationId: emailData.conversationId,
@@ -419,7 +416,21 @@ class EmailControllers {
             senderEmail: emailData.sender.emailAddress.address,
             queryDetails: emailData.subject || "No Subject",
             body: { content: emailData.body.content || "Body is Empty" },
-            comments: [],
+            comments: [
+              {
+                commentId,
+                senderName:
+                  emailData.sender.emailAddress.name || "Unknown Sender",
+                senderEmail: emailData.sender.emailAddress.address,
+                content: emailData.body.content || "No content",
+                role:
+                  emailData.sender.emailAddress.address ===
+                  "nitinnoyt829@outlook.com"
+                    ? "admin"
+                    : "user",
+                sentAt: new Date()
+              }
+            ],
             priority: "Medium",
             status: "Open"
           });
