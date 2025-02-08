@@ -450,7 +450,7 @@ class EmailControllers {
               senderEmail: emailData.sender.emailAddress.address,
               queryDetails: emailData.subject || "No Subject",
               body: { content: emailData.body.content || "Body is Empty" },
-              comments: [{}],
+              comments: [],
               priority: "Medium",
               status: "Open"
             });
