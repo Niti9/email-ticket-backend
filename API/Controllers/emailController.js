@@ -444,14 +444,14 @@ class EmailControllers {
             newTicket.ticketId
           );
 
-          if (mailSent.success) {
-            await TicketModel.updateOne(
-              { _id: newTicket._id },
-              { responseMail: true }
-            );
-          } else {
-            console.error("Failed to send confirmation email.");
-          }
+          // if (mailSent.success) {
+          //   await TicketModel.updateOne(
+          //     { _id: newTicket._id },
+          //     { responseMail: true }
+          //   );
+          // } else {
+          //   console.error("Failed to send confirmation email.");
+          // }
         } catch (notificationError) {
           console.error(
             `Error processing notification for emailId: ${notification.resource
