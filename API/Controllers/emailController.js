@@ -550,20 +550,20 @@ class EmailControllers {
           });
 
           await newTicket.save();
-          // **Send Confirmation Email & Update DB**
-          const mailSent = await MicrosoftOutlookService.sendConfirmationEmail(
-            accessToken.access_token,
-            senderEmail,
-            newTicket.ticketId
-          );
+          // // **Send Confirmation Email & Update DB**
+          // const mailSent = await MicrosoftOutlookService.sendConfirmationEmail(
+          //   accessToken.access_token,
+          //   senderEmail,
+          //   newTicket.ticketId
+          // );
 
-          console.log("mailSent are `````````````````````````", mailSent);
+          // console.log("mailSent are `````````````````````````", mailSent);
 
-          // Update responseMail status in DB
-          await TicketModel.updateOne(
-            { _id: newTicket._id },
-            { responseMail: mailSent }
-          );
+          // // Update responseMail status in DB
+          // await TicketModel.updateOne(
+          //   { _id: newTicket._id },
+          //   { responseMail: mailSent }
+          // );
         } catch (notificationError) {
           console.error(
             `Error processing notification for emailId: ${notification.resource
