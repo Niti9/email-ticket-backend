@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { TokenModel } from "./emailTokenSchema";
 
 const ticketSchema = new mongoose.Schema({
   userId: {
@@ -53,9 +54,13 @@ ticketSchema.pre("save", async function (next) {
 
     // Fetch user details
     const user = await TokenModel.findById(this.userId);
-    if (!user) return next(new Error("User not found"));
+    let userName = "RAMAN"; // Default name if user is not found
+    if (user && user.userName) {
+      userName = user.userName.toUpperCase().replace(/\s+/g, "-");
+    }
+    // if (!user) return next(new Error("User not found"));
 
-    let userName = user.userName.toUpperCase().replace(/\s+/g, "-"); // Convert username to uppercase and replace spaces with '-'
+    // let userName = user.userName.toUpperCase().replace(/\s+/g, "-"); // Convert username to uppercase and replace spaces with '-'
 
     // Find the last ticket with the same user prefix
     let lastTicket = await mongoose
