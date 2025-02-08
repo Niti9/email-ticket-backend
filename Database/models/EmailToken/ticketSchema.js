@@ -33,7 +33,8 @@ const ticketSchema = new mongoose.Schema({
   conversationId: { type: String, required: true }, // Identify conversations
   comments: [
     {
-      commentId: { type: String, default: "", sparse: true }, // sparse allows multiple null values
+      commentId: { type: String, default: "" }, // 🔥 Prevent null values
+      // commentId: { type: String, default: "", sparse: true }, // sparse allows multiple null values
       // commentId: { type: String, unique: false, sparse: true }, // sparse allows multiple null values
       // commentId: { type: String, required: true, unique: true }, // Unique ID for each comment
       senderName: { type: String, required: true },
