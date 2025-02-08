@@ -378,12 +378,11 @@ class EmailControllers {
               emailResponse
             );
 
-            const emailData = emailResponse;
-            const conversationId = emailData?.conversationId; // Extract conversationId from the email data
+            const conversationId = emailResponse?.conversationId; // Extract conversationId from the email data
             console.log("$$$$$$$$$$$$$conversationId is", conversationId);
-            const senderEmail = emailData.sender.emailAddress.address;
+            const senderEmail = emailResponse.sender.emailAddress.address;
             const senderName =
-              emailData.sender.emailAddress.name || "Unknown Sender";
+              emailResponse.sender.emailAddress.name || "Unknown Sender";
 
             // Check if the email already exists in the database
             const existingTicket = await TicketModel.findOne({
@@ -408,6 +407,20 @@ class EmailControllers {
                 return;
               }
             }
+
+            // Fetch email details only if it's not a duplicate
+            const emailData = await MicrosoftOutlookService.fetchEmailDetails(
+              emailId,
+              accessToken.access_token
+            );
+            if (!emailData) {
+              console.log("Email data not found.");
+              return;
+            }
+            console.log(
+              "this is emaildata \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\//////////////////////////////////////",
+              emailData
+            );
           } catch (error) {
             console.error("Error processing notification for emailId:", error);
             console.log(
