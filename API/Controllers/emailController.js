@@ -559,7 +559,7 @@ class EmailControllers {
           );
 
           console.log("mailSent are `````````````````````````", mailSent);
-          if (mailSent) {
+          if (mailSent.success) {
             // Update responseMail status in DB
             await TicketModel.updateOne(
               { _id: newTicket._id },
@@ -567,23 +567,9 @@ class EmailControllers {
             );
           } else {
             console.log("mail not sent please check code again");
-            continue;
+            return { success: false, message: "Email not sent" };
+            // continue;
           }
-
-          // // **Send Confirmation Email & Update DB**
-          // const mailSent = await MicrosoftOutlookService.sendConfirmationEmail(
-          //   accessToken.access_token,
-          //   senderEmail,
-          //   newTicket.ticketId
-          // );
-
-          // console.log("mailSent are `````````````````````````", mailSent);
-
-          // // Update responseMail status in DB
-          // await TicketModel.updateOne(
-          //   { _id: newTicket._id },
-          //   { responseMail: mailSent }
-          // );
         } catch (notificationError) {
           console.error(
             `Error processing notification for emailId: ${notification.resource
