@@ -604,8 +604,10 @@ class EmailControllers {
   };
 }
 
-// Runs every 5 minutes for testing
-cron.schedule("*/1 * * * *", async () => {
+// Run every 6 days to renew subscriptions
+cron.schedule("0 0 */6 * *", async () => {
+  // // Runs every 5 minutes for testing
+  // cron.schedule("*/1 * * * *", async () => {
   console.log("🔄 Running cron job to renew subscriptions (Every 5 mins)...");
 
   try {
