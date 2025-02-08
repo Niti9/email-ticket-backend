@@ -361,6 +361,27 @@ class EmailControllers {
           }
 
           console.log("emailId is emailId ==========================", emailId);
+          // Check if the email already exists in the database
+          const existingTicket = await TicketModel.findOne({
+            $or: [{ emailId }, { conversationId: emailId }]
+          });
+          console.log(
+            "existing Ticket are here ->>>>>>>>>>>>>>>>>>>>>>>>",
+            existingTicket
+          );
+
+          if (existingTicket) {
+            console.log(`Duplicate ticket detected for emailId: ${emailId}`);
+
+            // Prevent duplicate comments
+            const isDuplicateComment = existingTicket.comments.some(
+              (comment) => comment.commentId === emailId
+            );
+            if (isDuplicateComment) {
+              console.log(`Duplicate comment detected for emailId: ${emailId}`);
+              continue;
+            }
+          }
         } catch (error) {
           console.error("Error processing notification for emailId:");
           console.log(
@@ -371,156 +392,6 @@ class EmailControllers {
           );
         }
       }
-
-      // for (const notification of notifications) {
-      //   try {
-      //     const userId = notification.clientState;
-      //     if (!userId) {
-      //       console.warn("Missing userId in notification.");
-      //       continue;
-      //     }
-
-      //     // Fetch token record
-      //     const tokenRecord = await TokenModel.findOne({ user_id: userId });
-      //     if (!tokenRecord) {
-      //       console.warn(`No token record found for user_id: ${userId}`);
-      //       continue;
-      //     }
-
-      //     // Get Access Token
-      //     const accessToken = await this.getAccessToken(
-      //       tokenRecord.refresh_token
-      //     );
-      //     if (!accessToken?.access_token) {
-      //       console.error("Failed to retrieve access token.");
-      //       continue;
-      //     }
-
-      //     // Extract email ID
-      //     const emailId = notification.resource.split("/").pop();
-      //     if (!emailId) {
-      //       console.error("Invalid emailId in notification.");
-      //       continue;
-      //     }
-
-      //     console.log("emailId is emailId ==========================", emailId);
-
-      //     // Check if the email already exists in the database
-      //     const existingTicket = await TicketModel.findOne({
-      //       $or: [{ emailId }, { conversationId: emailId }]
-      //     });
-
-      //     if (existingTicket) {
-      //       console.log(`Duplicate ticket detected for emailId: ${emailId}`);
-
-      //       // Prevent duplicate comments
-      //       const isDuplicateComment = existingTicket.comments.some(
-      //         (comment) => comment.commentId === commentId
-      //       );
-      //       if (isDuplicateComment) {
-      //         console.log(`Duplicate comment detected for emailId: ${emailId}`);
-      //         continue;
-      //       }
-
-      //       // Fetch email details
-      //       const emailData = await MicrosoftOutlookService.fetchEmailDetails(
-      //         emailId,
-      //         accessToken.access_token
-      //       );
-      //       if (!emailData) {
-      //         console.log("Email data not found.");
-      //         continue;
-      //       }
-
-      //       // Ensure `commentId` is always set
-      //       const commentId =
-      //         emailData.id || new mongoose.Types.ObjectId().toString();
-      //       // Add comment to existing ticket
-      //       existingTicket.comments.push({
-      //         commentId,
-      //         senderName:
-      //           emailData.sender.emailAddress.name || "Unknown Sender",
-      //         senderEmail: emailData.sender.emailAddress.address,
-      //         content: emailData.body.content || "No content",
-      //         role:
-      //           emailData.sender.emailAddress.address ===
-      //           "nitinnoyt829@outlook.com"
-      //             ? "admin"
-      //             : "user",
-      //         sentAt: new Date()
-      //       });
-
-      //       await existingTicket.save();
-      //       continue;
-      //     }
-
-      //     // Fetch email details only if it's not a duplicate
-      //     const emailData = await MicrosoftOutlookService.fetchEmailDetails(
-      //       emailId,
-      //       accessToken.access_token
-      //     );
-      //     if (!emailData) {
-      //       console.log("Email data not found.");
-      //       continue;
-      //     }
-      //     console.log(
-      //       "this is emaildata \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
-      //       emailData
-      //     );
-
-      //     // Ensure `conversationId` is used for deduplication
-      //     const conversationId = emailData.conversationId;
-      //     const isConversationExist = await TicketModel.findOne({
-      //       conversationId
-      //     });
-
-      //     if (isConversationExist) {
-      //       console.log(
-      //         `Duplicate conversation detected for conversationId: ${conversationId}`
-      //       );
-      //       continue;
-      //     }
-
-      //     // Create a new ticket if it does not exist
-      //     const newTicket = new TicketModel({
-      //       userId: tokenRecord._id,
-      //       conversationId,
-      //       emailId,
-      //       senderName: emailData.sender.emailAddress.name || "Unknown Sender",
-      //       senderEmail: emailData.sender.emailAddress.address,
-      //       queryDetails: emailData.subject || "No Subject",
-      //       body: { content: emailData.body.content || "Body is Empty" },
-      //       comments: [],
-      //       priority: "Medium",
-      //       status: "Open"
-      //     });
-      //     await newTicket.save();
-
-      //     // // Send confirmation email
-      //     const mailSent = await MicrosoftOutlookService.sendConfirmationEmail(
-      //       accessToken.access_token,
-      //       emailData.sender.emailAddress.address,
-      //       newTicket.ticketId
-      //     );
-
-      //     if (mailSent.success) {
-      //       await TicketModel.updateOne(
-      //         { _id: newTicket._id },
-      //         { responseMail: true }
-      //       );
-      //     } else {
-      //       console.error("Failed to send confirmation email.");
-      //     }
-      //     return res.status(202).send("Notifications processed.");
-      //   } catch (notificationError) {
-      //     console.error(
-      //       `Error processing notification for emailId: ${notification.resource
-      //         .split("/")
-      //         .pop()}`,
-      //       notificationError
-      //     );
-      //   }
-      // }
 
       return res.status(202).send("Notifications processed.");
     } catch (error) {
