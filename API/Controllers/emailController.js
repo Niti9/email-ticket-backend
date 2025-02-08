@@ -33,7 +33,8 @@ class EmailControllers {
         return res.status(500).send("Failed to fetch access token.");
       }
     } else {
-      const redirectUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=Mail.Read offline_access&state=${userId}&prompt=consent`;
+      const redirectUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=Mail.Read Mail.Send User.Readoffline_access&state=${userId}&prompt=consent`;
+      // const redirectUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${process.env.CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI}&scope=Mail.Read offline_access&state=${userId}&prompt=consent`;
       return res.status(200).send({ redirectUrl });
     }
   };
@@ -121,7 +122,8 @@ class EmailControllers {
             redirect_uri: process.env.REDIRECT_URI,
             code: code,
             grant_type: "authorization_code",
-            scope: "Mail.Read offline_access"
+            scope: "Mail.Read Mail.Send User.Read"
+            // scope: "Mail.Read offline_access"
           }).toString()
         }
       );
@@ -158,7 +160,8 @@ class EmailControllers {
             redirect_uri: process.env.REDIRECT_URI,
             refresh_token: refreshToken,
             grant_type: "refresh_token",
-            scope: "Mail.Read Mail.Send"
+            scope: "Mail.Read Mail.Send User.Read"
+            // scope: "Mail.Read Mail.Send"
             // scope: "Mail.read"
           }).toString()
         }

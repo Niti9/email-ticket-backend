@@ -18,6 +18,7 @@ class MicrosoftOutlookServices {
 
       const adminData = await adminResponse.json();
       const adminEmail = adminData.mail || adminData.userPrincipalName;
+      console.log("admin mail is adminEmail", adminEmail);
 
       if (!adminEmail) {
         console.log("No admin email found");
