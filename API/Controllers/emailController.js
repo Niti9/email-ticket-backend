@@ -474,6 +474,9 @@ class EmailControllers {
 
           const emailData = emailResponse.data;
           const conversationId = emailData.conversationId; // Extract conversationId from the email data
+          const senderEmail = emailData.sender.emailAddress.address;
+          const senderName =
+            emailData.sender.emailAddress.name || "Unknown Sender";
 
           // Check for duplicate tickets by `emailId` or `conversationId`
           const existingTicket = await TicketModel.findOne({
@@ -506,9 +509,8 @@ class EmailControllers {
 
               existingTicket.comments.push({
                 commentId: emailData.id,
-                senderName:
-                  emailData.sender.emailAddress.name || "Unknown Sender",
-                senderEmail: emailData.sender.emailAddress.address,
+                senderName,
+                senderEmail,
                 content: emailData.body.content || "No content", // Reply content
                 role:
                   emailData.sender.emailAddress.address ===
@@ -533,8 +535,8 @@ class EmailControllers {
             userId: tokenRecord._id,
             conversationId: conversationId,
             emailId: emailId,
-            senderName: emailData.sender.emailAddress.name || "Unknown Sender",
-            senderEmail: emailData.sender.emailAddress.address,
+            senderName,
+            senderEmail,
             queryDetails: emailData.subject || "No Subject",
             // body: emailData.body.content || "No content",
             body: { content: emailData.body.content || "Body is Empty" },
@@ -551,6 +553,8 @@ class EmailControllers {
             senderEmail,
             newTicket.ticketId
           );
+
+          console.log("mailSent are `````````````````````````", mailSent);
 
           // Update responseMail status in DB
           await TicketModel.updateOne(
