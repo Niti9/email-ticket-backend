@@ -378,7 +378,7 @@ class EmailControllers {
             }
 
             // Fetch email details
-            const emailData = await fetchEmailDetails(
+            const emailData = await MicrosoftOutlookService.fetchEmailDetails(
               emailId,
               accessToken.access_token
             );
