@@ -378,15 +378,16 @@ class EmailControllers {
               emailResponse
             );
 
-            const emailData = emailResponse.data;
-            const conversationId = emailData.conversationId; // Extract conversationId from the email data
+            const emailData = emailResponse;
+            const conversationId = emailData?.conversationId; // Extract conversationId from the email data
+            console.log("$$$$$$$$$$$$$conversationId is", conversationId);
             const senderEmail = emailData.sender.emailAddress.address;
             const senderName =
               emailData.sender.emailAddress.name || "Unknown Sender";
 
             // Check if the email already exists in the database
             const existingTicket = await TicketModel.findOne({
-              $or: [{ emailId }, { conversationId: emailId }]
+              $or: [{ emailId }, { conversationId: conversationId }]
             });
             console.log(
               "existing Ticket are here ->>>>>>>>>>>>>>>>>>>>>>>>",
