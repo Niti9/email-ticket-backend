@@ -562,7 +562,7 @@ class EmailControllers {
             // Update responseMail status in DB
             await TicketModel.updateOne(
               { _id: newTicket._id },
-              { responseMail: mailSent }
+              { responseMail: mailSent.success }
             );
           } else {
             console.log("mail not sent please check code again");
