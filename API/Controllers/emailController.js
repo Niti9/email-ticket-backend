@@ -2,6 +2,7 @@ import axios from "axios";
 import { TokenModel } from "../../Database/models/EmailToken/emailTokenSchema.js";
 import TicketModel from "../../Database/models/EmailToken/ticketSchema.js";
 import cron from "node-cron";
+import MicrosoftOutlookService from "../../Service/MicrosoftOutlookService.js";
 class EmailControllers {
   // Method to check if refresh token exists, and if it does, get the access token
   handleConsent = async (req, res) => {
@@ -544,6 +545,18 @@ class EmailControllers {
           });
 
           await newTicket.save();
+          // **Send Confirmation Email & Update DB**
+          const mailSent = await MicrosoftOutlookService.sendConfirmationEmail(
+            accessToken.access_token,
+            senderEmail,
+            newTicket.ticketId
+          );
+
+          // Update responseMail status in DB
+          await TicketModel.updateOne(
+            { _id: newTicket._id },
+            { responseMail: mailSent }
+          );
         } catch (notificationError) {
           console.error(
             `Error processing notification for emailId: ${notification.resource
