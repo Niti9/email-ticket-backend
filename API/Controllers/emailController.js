@@ -1,7 +1,7 @@
 import axios from "axios";
 import { TokenModel } from "../../Database/models/EmailToken/emailTokenSchema.js";
 import TicketModel from "../../Database/models/EmailToken/ticketSchema.js";
-
+import cron from "node-cron";
 class EmailControllers {
   // Method to check if refresh token exists, and if it does, get the access token
   handleConsent = async (req, res) => {
@@ -157,7 +157,8 @@ class EmailControllers {
             redirect_uri: process.env.REDIRECT_URI,
             refresh_token: refreshToken,
             grant_type: "refresh_token",
-            scope: "Mail.read"
+            scope: "Mail.Read Mail.Send"
+            // scope: "Mail.read"
           }).toString()
         }
       );
@@ -194,7 +195,11 @@ class EmailControllers {
             notificationUrl:
               "https://email-ticket-backend.vercel.app/api/ticket/tickets/webhook",
             resource: "me/messages",
-            expirationDateTime: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
+            expirationDateTime: new Date(Date.now() + 60000).toISOString(), // 1 minute from now
+            // expirationDateTime: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
+            // expirationDateTime: new Date(
+            //   Date.now() + 7 * 24 * 60 * 60 * 1000
+            // ).toISOString(), // 7 days from now
             // clientState: "yourClientState"
             clientState: userId
           })
@@ -471,7 +476,8 @@ class EmailControllers {
 
           // Check for duplicate tickets by `emailId` or `conversationId`
           const existingTicket = await TicketModel.findOne({
-            $or: [{ ticketId: emailId }, { conversationId }]
+            $or: [{ emailId: emailId }, { conversationId }]
+            // $or: [{ ticketId: emailId }, { conversationId }]
           });
 
           if (existingTicket) {
@@ -525,7 +531,7 @@ class EmailControllers {
           const newTicket = new TicketModel({
             userId: tokenRecord._id,
             conversationId: conversationId,
-            ticketId: emailId,
+            emailId: emailId,
             senderName: emailData.sender.emailAddress.name || "Unknown Sender",
             senderEmail: emailData.sender.emailAddress.address,
             queryDetails: emailData.subject || "No Subject",
@@ -565,6 +571,47 @@ class EmailControllers {
     }
   };
 }
+
+// Runs every 5 minutes for testing
+cron.schedule("*/1 * * * *", async () => {
+  console.log("🔄 Running cron job to renew subscriptions (Every 5 mins)...");
+
+  try {
+    const users = await TokenModel.find(); // Fetch all users from DB
+
+    for (const user of users) {
+      const { user_id, refresh_token } = user;
+
+      if (!refresh_token) {
+        console.log(`⚠️ Skipping user ${user_id} (no refresh token)`);
+        continue;
+      }
+
+      try {
+        const value = new EmailControllers();
+
+        const newAccessToken = await value.getAccessToken(refresh_token); // Refresh token logic
+        const response = await value.automaticSubscription(
+          user_id,
+          newAccessToken.access_token
+        );
+
+        if (response.clientState === user_id) {
+          console.log(`✅ Subscription renewed for user ${user_id}`);
+        } else {
+          console.log(
+            `❌ Failed to renew for user ${user_id}:`,
+            response.message
+          );
+        }
+      } catch (error) {
+        console.error(`🚨 Error processing user ${user_id}:`, error.message);
+      }
+    }
+  } catch (error) {
+    console.error("🚨 Error fetching users:", error.message);
+  }
+});
 
 // Renew subscription
 export async function renewSubscription(subscriptionId) {

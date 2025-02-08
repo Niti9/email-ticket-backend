@@ -16,7 +16,9 @@ const ticketSchema = new mongoose.Schema({
     ref: "Department",
     default: null
   },
-  ticketId: { type: String, required: true, unique: true },
+  emailId: { type: String, required: true, unique: true },
+  ticketId: { type: String, unique: true },
+  // ticketId: { type: String, required: true, unique: true },
   senderName: { type: String, required: true },
   senderEmail: { type: String, required: true },
   queryDetails: { type: String, required: true },
@@ -44,5 +46,60 @@ const ticketSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+// Pre-save hook to generate a unique ticketId
+ticketSchema.pre("save", async function (next) {
+  try {
+    if (!this.isNew) return next(); // Only generate ticketId for new tickets
+
+    // Fetch user details
+    const user = await TokenModel.findById(this.userId);
+    if (!user) return next(new Error("User not found"));
+
+    let userName = user.userName.toUpperCase().replace(/\s+/g, "-"); // Convert username to uppercase and replace spaces with '-'
+
+    // Find the last ticket with the same user prefix
+    let lastTicket = await mongoose
+      .model("Ticket")
+      .findOne(
+        { ticketId: { $regex: `^${userName}-\\d{4}$` } }, // Match pattern USERNAME-####
+        { ticketId: 1 }
+      )
+      .sort({ _id: -1 }); // Sort to get the latest ticket
+
+    let nextNumber = 1; // Default to 0001
+
+    if (lastTicket && lastTicket.ticketId) {
+      const match = lastTicket.ticketId.match(/-(\d+)$/);
+      if (match) {
+        nextNumber = parseInt(match[1], 10) + 1;
+      }
+    }
+
+    let isUnique = false;
+    let ticketId = "";
+
+    while (!isUnique) {
+      ticketId = `${userName}-${String(nextNumber).padStart(4, "0")}`;
+
+      const existingTicket = await mongoose
+        .model("Ticket")
+        .findOne({ ticketId });
+
+      if (!existingTicket) {
+        isUnique = true;
+      } else {
+        nextNumber++;
+      }
+    }
+
+    this.ticketId = ticketId;
+    console.log("Generated TicketId:", this.ticketId);
+
+    next();
+  } catch (error) {
+    console.error("Error generating ticketId:", error);
+    next(error);
+  }
+});
 const TicketModel = mongoose.model("Ticket", ticketSchema);
 export default TicketModel;
