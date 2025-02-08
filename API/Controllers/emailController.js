@@ -511,7 +511,8 @@ class EmailControllers {
               }
 
               existingTicket.comments.push({
-                commentId: emailData.id,
+                commentId:
+                  emailData.id || new mongoose.Types.ObjectId().toString(), //ensure unique id is there
                 senderName,
                 senderEmail,
                 content: emailData.body.content || "No content", // Reply content
