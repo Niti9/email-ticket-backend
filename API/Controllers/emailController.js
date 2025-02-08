@@ -421,6 +421,40 @@ class EmailControllers {
               "this is emaildata \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\//////////////////////////////////////",
               emailData
             );
+
+            //  //Ensure `conversationId` is used for deduplication
+            // const conversationId = emailData.conversationId;
+            const isConversationExist = await TicketModel.findOne({
+              conversationId
+            });
+
+            console.log(
+              "isConversationExist*******************************",
+              isConversationExist
+            );
+
+            if (isConversationExist) {
+              console.log(
+                `Duplicate conversation detected for conversationId: ${conversationId}`
+              );
+              return;
+            }
+
+            // Create a new ticket if it does not exist
+            const newTicket = new TicketModel({
+              userId: tokenRecord._id,
+              conversationId,
+              emailId,
+              senderName:
+                emailData.sender.emailAddress.name || "Unknown Sender",
+              senderEmail: emailData.sender.emailAddress.address,
+              queryDetails: emailData.subject || "No Subject",
+              body: { content: emailData.body.content || "Body is Empty" },
+              comments: [],
+              priority: "Medium",
+              status: "Open"
+            });
+            await newTicket.save();
           } catch (error) {
             console.error("Error processing notification for emailId:", error);
             console.log(
