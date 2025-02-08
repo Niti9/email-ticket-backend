@@ -319,18 +319,57 @@ class EmailControllers {
         return res.status(200).send(req.query.validationToken);
       }
 
-      console.log("Notification Received:", req.body);
+      // console.log("Notification Received:", req.body);
       const notifications = req.body.value;
       if (!notifications || notifications.length === 0) {
         console.log("No notifications received.");
         return res.status(204).send("No notifications received.");
       }
-      console.log("notifications are ", notifications);
       for (const notification of notifications) {
-        console.log(
-          "notification are```````````````````````````````",
-          notification
-        );
+        try {
+          console.log(
+            "notification are```````````````````````````````",
+            notification
+          );
+          const userId = notification.clientState;
+          if (!userId) {
+            console.warn("Missing userId in notification.");
+            continue;
+          }
+
+          // Fetch token record
+          const tokenRecord = await TokenModel.findOne({ user_id: userId });
+          if (!tokenRecord) {
+            console.warn(`No token record found for user_id: ${userId}`);
+            continue;
+          }
+
+          // Get Access Token
+          const accessToken = await this.getAccessToken(
+            tokenRecord.refresh_token
+          );
+          if (!accessToken?.access_token) {
+            console.error("Failed to retrieve access token.");
+            continue;
+          }
+
+          // Extract email ID
+          const emailId = notification.resource.split("/").pop();
+          if (!emailId) {
+            console.error("Invalid emailId in notification.");
+            continue;
+          }
+
+          console.log("emailId is emailId ==========================", emailId);
+        } catch (error) {
+          console.error("Error processing notification for emailId:");
+          console.log(
+            `notification resource error ${notification.resource
+              .split("/")
+              .pop()}`,
+            error
+          );
+        }
       }
 
       // for (const notification of notifications) {
