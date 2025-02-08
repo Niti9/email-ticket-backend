@@ -1,7 +1,27 @@
 // import { TokenModel } from "../Database/models/EmailToken/emailTokenSchema.js";
 // import OutlookRepo from "../Database/repository/OutlookRepo.js";
 
+import axios from "axios";
+
 class MicrosoftOutlookServices {
+  // Fetch email details function
+  fetchEmailDetails = async (emailId, accessToken) => {
+    try {
+      const emailResponse = await axios.get(
+        `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }
+      );
+      return emailResponse.data;
+    } catch (error) {
+      console.error(
+        `Error fetching email details for emailId: ${emailId}`,
+        error
+      );
+      return null;
+    }
+  };
   automaticSubscription = async (
     userId,
     accessToken,
