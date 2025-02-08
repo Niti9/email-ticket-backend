@@ -455,13 +455,21 @@ class EmailControllers {
               status: "Open"
             });
             await newTicket.save();
-            // // // Send confirmation email
-            // const mailSent =
-            //   await MicrosoftOutlookService.sendConfirmationEmail(
-            //     accessToken.access_token,
-            //     emailData.sender.emailAddress.address,
-            //     newTicket.ticketId
-            //   );
+            // // Send confirmation email
+            const mailSent =
+              await MicrosoftOutlookService.sendConfirmationEmail(
+                accessToken.access_token,
+                emailData.sender.emailAddress.address,
+                newTicket.ticketId
+              );
+
+            if (mailSent.success) {
+              newTicket.responseMail = true;
+              await newTicket.save();
+            } else {
+              console.error("Failed to send confirmation email.");
+              return;
+            }
 
             // if (mailSent.success) {
             //   await TicketModel.updateOne(
