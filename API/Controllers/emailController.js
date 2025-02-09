@@ -425,6 +425,7 @@ class EmailControllers {
               return console.error("Invalid emailId in notification.");
 
             const data = await MicrosoftOutlookService.allOperations(
+              tokenRecord,
               emailId,
               accessToken.access_token
             );
