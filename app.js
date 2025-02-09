@@ -111,7 +111,7 @@ EmailRoutes.post("/api/ticket/testing", emailController.testing);
 EmailRoutes.get("/api/ticket/tickets/unseen", emailController.unseenTickets);
 EmailRoutes.patch("/api/ticket/tickets/seen/:id", emailController.seenTickets);
 EmailRoutes.patch(
-  "/api/ticket/tikets/seen-all",
+  "/api/ticket/tickets/seen-all",
   emailController.seenAllTickets
 );
 

@@ -92,6 +92,50 @@ class MicrosoftOutlookServices {
     }
   };
 
+  getAccessToken = async (refreshToken) => {
+    try {
+      const response = await fetch(
+        "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: new URLSearchParams({
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET,
+            redirect_uri: process.env.REDIRECT_URI,
+            refresh_token: refreshToken,
+            grant_type: "refresh_token",
+            scope: "Mail.Read Mail.Send User.Read"
+            // scope: "Mail.Read Mail.Send"
+            // scope: "Mail.read"
+          }).toString()
+        }
+      );
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        return {
+          success: false,
+          status: response.status,
+          message: errorMessage
+        };
+      }
+      const data = await response.json();
+
+      return {
+        success: true,
+        message: "Access Token generated successfully",
+        data: data
+      };
+    } catch (error) {
+      console.error(
+        "Error exchanging refresh token for access token:",
+        error.error_description
+      );
+      throw error;
+    }
+  };
   sendConfirmationEmail = async (accessToken, userEmail, ticketId) => {
     try {
       const emailBody = {
