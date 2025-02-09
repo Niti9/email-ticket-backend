@@ -8,6 +8,31 @@ class MicrosoftOutlookServices {
   // Fetch email details function
   fetchEmailDetails = async (emailId, accessToken) => {
     try {
+      const hasSentResponse = await TicketModel.findOne({
+        emailId
+      });
+      const emailResponse = await axios.get(
+        `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        }
+      );
+
+      if (!hasSentResponse) {
+        console.log("email not exist");
+        return emailResponse.data;
+      }
+      return;
+    } catch (error) {
+      console.error(
+        `Error fetching email details for emailId: ${emailId}`,
+        error
+      );
+      return null;
+    }
+  };
+  fetchEmailDetails2 = async (emailId, accessToken) => {
+    try {
       const emailResponse = await axios.get(
         `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
         {
