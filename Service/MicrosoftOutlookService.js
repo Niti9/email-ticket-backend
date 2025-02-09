@@ -8,9 +8,6 @@ class MicrosoftOutlookServices {
   // Fetch email details function
   fetchEmailDetails = async (emailId, accessToken) => {
     try {
-      const hasSentResponse = await TicketModel.findOne({
-        emailId
-      });
       const emailResponse = await axios.get(
         `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
         {
@@ -18,11 +15,8 @@ class MicrosoftOutlookServices {
         }
       );
 
-      if (!hasSentResponse) {
-        console.log("email not exist");
-        return emailResponse.data;
-      }
-      return;
+      console.log("email not exist");
+      return emailResponse.data;
     } catch (error) {
       console.error(
         `Error fetching email details for emailId: ${emailId}`,
