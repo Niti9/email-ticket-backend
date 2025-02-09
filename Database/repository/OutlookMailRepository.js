@@ -6,7 +6,7 @@ class OutlookMailRepository {
     // **Create a new ticket**
     const newTicket = new TicketModel({
       userId: tokenRecord._id,
-      conversationId: emailResponse.conversationId,
+      conversationId: emailResponse?.conversationId,
       emailId,
       senderName: emailResponse.sender.emailAddress.name || "Unknown Sender",
       senderEmail: emailResponse.sender.emailAddress.addresss,
