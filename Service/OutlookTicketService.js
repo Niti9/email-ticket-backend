@@ -59,12 +59,12 @@ class OutlookTicketService {
 
     // **Prevent duplicate ticket creation**
 
-    const alreadyExists = OutlookMailRepository.EmailIdAlreadyExists(emailId);
-    if (alreadyExists) {
-      console.log(`Skipping duplicate ticket for emailId: ${emailId}`);
-      return { success: false, message: "alreadyExists error" };
-    }
-    console.log("alreadyExists are ", alreadyExists);
+    // const alreadyExists = OutlookMailRepository.EmailIdAlreadyExists(emailId);
+    // if (alreadyExists) {
+    //   console.log(`Skipping duplicate ticket for emailId: ${emailId}`);
+    //   return { success: false, message: "alreadyExists error" };
+    // }
+    // console.log("alreadyExists are ", alreadyExists);
 
     const create = await OutlookMailRepository.createNewTicket(
       tokenRecord,
