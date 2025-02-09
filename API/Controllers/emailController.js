@@ -313,165 +313,139 @@ class EmailControllers {
 
   webhook = async (req, res) => {
     try {
-      // Handle validation token
       if (req.query.validationToken) {
         console.log("Validation Token Received:", req.query.validationToken);
         return res.status(200).send(req.query.validationToken);
       }
 
-      // console.log("Notification Received:", req.body);
       const notifications = req.body.value;
       if (!notifications || notifications.length === 0) {
         console.log("No notifications received.");
         return res.status(204).send("No notifications received.");
       }
+
       await Promise.all(
         notifications.map(async (notification) => {
           try {
-            console.log(
-              "notification are```````````````````````````````",
-              notification
-            );
             const userId = notification.clientState;
-            if (!userId) {
-              console.warn("Missing userId in notification.");
-              return;
-            }
+            if (!userId) return console.warn("Missing userId in notification.");
 
-            // Fetch token record
             const tokenRecord = await TokenModel.findOne({ user_id: userId });
-            if (!tokenRecord) {
-              console.warn(`No token record found for user_id: ${userId}`);
-              return;
-            }
+            if (!tokenRecord)
+              return console.warn(`No token record for user: ${userId}`);
 
-            // Get Access Token
             const accessToken = await this.getAccessToken(
               tokenRecord.refresh_token
             );
-            if (!accessToken?.access_token) {
-              console.error("Failed to retrieve access token.");
-              return;
-            }
+            if (!accessToken?.access_token)
+              return console.error("Failed to retrieve access token.");
 
-            // Extract email ID
             const emailId = notification.resource.split("/").pop();
-            if (!emailId) {
-              console.error("Invalid emailId in notification.");
-              return;
-            }
+            if (!emailId)
+              return console.error("Invalid emailId in notification.");
 
-            console.log(
-              "emailId is emailId ==========================",
-              emailId
-            );
+            console.log("Processing emailId:", emailId);
 
-            // Fetch email details from Microsoft Graph API
+            // Fetch email details
             const emailResponse =
               await MicrosoftOutlookService.fetchEmailDetails(
                 emailId,
                 accessToken.access_token
               );
 
-            console.log(
-              "emailResponse is this '''''''''''''''''''''''''''''''''''''''''''''''''''''''",
-              emailResponse
-            );
-
-            const conversationId = emailResponse.conversationId; // Extract conversationId from the email data
-            console.log("$$$$$$$$$$$$$conversationId is", conversationId);
+            const conversationId = emailResponse.conversationId;
             const senderEmail = emailResponse.sender.emailAddress.address;
             const senderName =
               emailResponse.sender.emailAddress.name || "Unknown Sender";
 
-            // Check if the email already exists in the database
-            const existingTicket = await TicketModel.findOne({
-              $or: [{ emailId }, { conversationId }]
+            // **Check for existing tickets**
+            let existingTicket = await TicketModel.findOne({
+              $or: [{ conversationId }, { emailId }]
             });
-            console.log(
-              "existing Ticket are here ->>>>>>>>>>>>>>>>>>>>>>>>",
-              existingTicket
-            );
 
             if (existingTicket) {
-              console.log(`Duplicate ticket detected for emailId: ${emailId}`);
+              console.log(`Existing ticket found for emailId: ${emailId}`);
 
-              // If conversation exists, update comments
+              // If this is a reply, add it as a comment
               if (existingTicket.conversationId === conversationId) {
-                console.log(
-                  `Adding a reply to the existing conversation for conversationId: ${conversationId}`
-                );
-                // Prevent duplicate comments
                 const isDuplicateComment = existingTicket.comments.some(
-                  (comment) => comment.commentId === conversationId
+                  (comment) => comment.commentId === emailId
                 );
-                if (isDuplicateComment) {
-                  console.log(
-                    `Duplicate comment detected for emailId: ${emailId}`
-                  );
-                  return;
+                if (!isDuplicateComment) {
+                  existingTicket.comments.push({
+                    commentId: emailId,
+                    senderName,
+                    senderEmail,
+                    content: emailResponse.body.content || "No content",
+                    role: "user"
+                  });
+                  await existingTicket.save();
+                  console.log("Reply added as a comment.");
                 } else {
-                  console.log("no duplicate comment here");
-                  return;
+                  console.log("Duplicate comment detected, skipping.");
                 }
               }
-              return; //skip processing this notification further
-            }
-
-            // Prevent duplicate ticket creation due to multiple webhook triggers
-            const alreadyExists = await TicketModel.findOne({ emailId });
-            if (alreadyExists) {
-              console.log(
-                `Skipping duplicate ticket creation for emailId: ${emailId}`
-              );
               return;
             }
 
-            // Create a new ticket if it does not exist
+            // **Prevent duplicate ticket creation**
+            const alreadyExists = await TicketModel.findOne({ emailId });
+            if (alreadyExists) {
+              console.log(`Skipping duplicate ticket for emailId: ${emailId}`);
+              return;
+            }
+
+            // **Create a new ticket**
             const newTicket = new TicketModel({
               userId: tokenRecord._id,
               conversationId,
               emailId,
-              senderName:
-                emailResponse.sender.emailAddress.name || "Unknown Sender",
-              senderEmail: emailResponse.sender.emailAddress.address,
+              senderName,
+              senderEmail,
               queryDetails: emailResponse.subject || "No Subject",
               body: { content: emailResponse.body.content || "Body is Empty" },
               comments: [],
               priority: "Medium",
-              status: "Open"
+              status: "Open",
+              responseMailSent: false // ✅ Ensure initial state is false
             });
-            const value = await newTicket.save();
-            console.log("value ", value.responseMail);
 
-            // // ✅ Stop confirmation email from triggering webhook again
-            // if (!newTicket.responseMail) {
-            //   console.log("Sending confirmation email...");
-            //   const mailSent =
-            //     await MicrosoftOutlookService.sendConfirmationEmail(
-            //       accessToken.access_token,
-            //       emailResponse.sender.emailAddress.address,
-            //       newTicket.ticketId
-            //     );
+            await newTicket.save();
+            console.log("New ticket created:", newTicket.ticketId);
 
-            //   if (mailSent.success) {
-            //     newTicket.responseMail = true;
-            //     await newTicket.save();
-            //     console.log("Response mail sent successfully.");
-            //   } else {
-            //     console.error("Failed to send confirmation email.");
-            //   }
-            // } else {
-            //   console.log("Skipping confirmation email to prevent loop.");
-            // }
+            // **✅ Send response mail only once per sender**
+            const hasSentResponse = await TicketModel.findOne({
+              senderEmail,
+              responseMail: true
+            });
+
+            if (!hasSentResponse) {
+              console.log("Sending confirmation email...");
+              const mailSent =
+                await MicrosoftOutlookService.sendConfirmationEmail(
+                  accessToken.access_token,
+                  senderEmail,
+                  newTicket.ticketId
+                );
+
+              if (mailSent.success) {
+                await TicketModel.updateMany(
+                  { senderEmail },
+                  { $set: { responseMailSent: true } }
+                );
+                console.log(`✅ Response mail sent to ${senderEmail}`);
+              } else {
+                console.error(
+                  `❌ Failed to send confirmation email to ${senderEmail}`
+                );
+              }
+            } else {
+              console.log(
+                `Skipping response email for ${senderEmail}, already sent.`
+              );
+            }
           } catch (error) {
-            console.error("Error processing notification for emailId:", error);
-            console.log(
-              `notification resource error ${notification.resource
-                .split("/")
-                .pop()}`,
-              error
-            );
+            console.error("Error processing notification:", error);
           }
         })
       );
