@@ -444,6 +444,16 @@ class EmailControllers {
 
             if (senderEmail === "nitinnoyt829@outlook.com") {
               console.log("sender mail admin ki hai ");
+              const conversationExist = await TicketModel.findOne({
+                conversationId
+              });
+              if (conversationExist) {
+                console.log(
+                  "our conversationg already exists +++++++++++++++++",
+                  conversationExist
+                );
+              }
+
               return;
             }
             // **Check for existing tickets**
