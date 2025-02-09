@@ -67,6 +67,7 @@ class OutlookTicketService {
     // console.log("alreadyExists are ", alreadyExists);
 
     const create = await OutlookMailRepository.createNewTicket(
+      emailId,
       tokenRecord,
       emailResponse
     );
