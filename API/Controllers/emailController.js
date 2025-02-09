@@ -408,7 +408,8 @@ class EmailControllers {
               );
             const conversationId = emailResponse.conversationId;
             const senderEmail = emailResponse.sender.emailAddress.address;
-
+            const senderName =
+              emailResponse.sender.emailAddress.name || "Unknown Sender";
             // **Prevent duplicate ticket creation**
             const alreadyExists = await TicketModel.findOne({
               emailId: emailId
