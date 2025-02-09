@@ -110,9 +110,13 @@ class EmailControllers {
       console.log(`✅ Confirmation email successfully sent to ${userEmail}`);
       // ✅ Update ticket's responseMail to true
       await TicketModel.updateOne(
-        { ticketId: ticketId },
+        { emailId: ticketId },
         { $set: { responseMail: true } }
       );
+      // await TicketModel.updateOne(
+      //   { ticketId: ticketId },
+      //   { $set: { responseMail: true } }
+      // );
       return res
         .status(200)
         .json({ success: true, message: "Email sent successfully" });
