@@ -418,6 +418,15 @@ class EmailControllers {
               return; //skip processing this notification further
             }
 
+            // Prevent duplicate ticket creation due to multiple webhook triggers
+            const alreadyExists = await TicketModel.findOne({ emailId });
+            if (alreadyExists) {
+              console.log(
+                `Skipping duplicate ticket creation for emailId: ${emailId}`
+              );
+              return;
+            }
+
             // Create a new ticket if it does not exist
             const newTicket = new TicketModel({
               userId: tokenRecord._id,
@@ -432,7 +441,30 @@ class EmailControllers {
               priority: "Medium",
               status: "Open"
             });
-            await newTicket.save();
+            const value = await newTicket.save();
+
+            console.log("values@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", value);
+            // // ✅ Stop confirmation email from triggering webhook again
+            // if (!emailResponse.isReply) {
+            //   console.log("Sending confirmation email...");
+            //   const mailSent =
+            //     await MicrosoftOutlookService.sendConfirmationEmail(
+            //       accessToken.access_token,
+            //       emailResponse.sender.emailAddress.address,
+            //       newTicket.ticketId
+            //     );
+
+            //   if (mailSent.success) {
+            //     newTicket.responseMail = true;
+            //     await newTicket.save();
+            //     console.log("Response mail sent successfully.");
+            //   } else {
+            //     console.error("Failed to send confirmation email.");
+            //   }
+            // } else {
+            //   console.log("Skipping confirmation email to prevent loop.");
+            // }
+
             // // // Send confirmation email
             // const mailSent =
             //   await MicrosoftOutlookService.sendConfirmationEmail(
@@ -445,15 +477,6 @@ class EmailControllers {
             //   newTicket.responseMail = true;
             //   await newTicket.save();
             //   console.log("Response mail sent successfully.");
-            // } else {
-            //   console.error("Failed to send confirmation email.");
-            // }
-
-            // if (mailSent.success) {
-            //   await TicketModel.updateOne(
-            //     { _id: newTicket._id },
-            //     { responseMail: true }
-            //   );
             // } else {
             //   console.error("Failed to send confirmation email.");
             // }
