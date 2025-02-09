@@ -424,10 +424,10 @@ class EmailControllers {
               conversationId,
               emailId,
               senderName:
-                emailData.sender.emailAddress.name || "Unknown Sender",
-              senderEmail: emailData.sender.emailAddress.address,
-              queryDetails: emailData.subject || "No Subject",
-              body: { content: emailData.body.content || "Body is Empty" },
+                emailResponse.sender.emailAddress.name || "Unknown Sender",
+              senderEmail: emailResponse.sender.emailAddress.address,
+              queryDetails: emailResponse.subject || "No Subject",
+              body: { content: emailResponse.body.content || "Body is Empty" },
               comments: [],
               priority: "Medium",
               status: "Open"
