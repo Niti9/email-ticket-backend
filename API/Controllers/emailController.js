@@ -347,7 +347,7 @@ class EmailControllers {
             console.log("Processing emailId:", emailId);
 
             const existMail = await TicketModel.findOne({
-              emailId
+              emailId: emailId
             });
             if (existMail) {
               // Fetch email details
@@ -410,7 +410,9 @@ class EmailControllers {
             const senderEmail = emailResponse.sender.emailAddress.address;
 
             // **Prevent duplicate ticket creation**
-            const alreadyExists = await TicketModel.findOne({ emailId });
+            const alreadyExists = await TicketModel.findOne({
+              emailId: emailId
+            });
             if (alreadyExists) {
               console.log(`Skipping duplicate ticket for emailId: ${emailId}`);
               return;
@@ -436,7 +438,7 @@ class EmailControllers {
             console.log("New ticket created:", newTicket.ticketId);
 
             const hasSentResponse = await TicketModel.findOne({
-              ticketId,
+              ticketId: newTicket.ticketId,
               responseMail: true
             });
             try {
