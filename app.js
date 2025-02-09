@@ -106,6 +106,8 @@ app.get("/", (req, res) => {
 EmailRoutes.post("/api/ticket/tickets/webhook", emailController.webhook);
 EmailRoutes.get("/api/ticket/tickets", emailController.getallTickets);
 EmailRoutes.put("/api/ticket/tickets/:id", emailController.EditTicket);
+EmailRoutes.put("/api/ticket/tickets/:id", emailController.EditTicket);
+EmailRoutes.post("api/ticket/testing", emailController.testing);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

@@ -4,6 +4,86 @@ import TicketModel from "../../Database/models/EmailToken/ticketSchema.js";
 import cron from "node-cron";
 import MicrosoftOutlookService from "../../Service/MicrosoftOutlookService.js";
 class EmailControllers {
+  testing = async (req, res) => {
+    try {
+      const { accessToken, userEmail, ticketId } = req.body;
+      if (!accessToken) {
+        console.error("Access token is missing!");
+        return { success: false, message: "Access token is required" };
+      }
+
+      if (!userEmail) {
+        console.error("User email is missing!");
+        return { success: false, message: "User email is required" };
+      }
+
+      console.log(
+        `Sending confirmation email to ${userEmail} for Ticket ID: ${ticketId}`
+      );
+
+      // **Check if response mail was already sent**
+      const existingTicket = await TicketModel.findOne({ ticketId });
+      if (existingTicket?.responseMail) {
+        console.log(
+          `⚠️ Email already sent for Ticket ID: ${ticketId}, skipping.`
+        );
+        return res
+          .status(200)
+          .json({ success: false, message: "Email already sent" });
+      }
+
+      // Email Body
+      const emailBody = {
+        message: {
+          subject: `Your Ticket is Raised - Ticket ID: ${ticketId}`,
+          body: {
+            contentType: "Text",
+            content: `We have received your request. Your Ticket ID is '${ticketId}'. We will resolve your issue as soon as possible.`
+          },
+          toRecipients: [{ emailAddress: { address: userEmail } }]
+        },
+        saveToSentItems: "true"
+      };
+
+      // Send Email
+      const emailResponse = await fetch(
+        "https://graph.microsoft.com/v1.0/me/sendMail",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(emailBody)
+        }
+      );
+
+      const responseText = await emailResponse.text();
+
+      if (!emailResponse.ok) {
+        console.error(
+          `Failed to send email to ${userEmail}. Status: ${emailResponse.status}, Response: ${responseText}`
+        );
+        return {
+          success: false,
+          message: `Failed to send email: ${responseText}`
+        };
+      }
+
+      console.log(`✅ Confirmation email successfully sent to ${userEmail}`);
+      // ✅ Update ticket's responseMail to true
+      await TicketModel.updateOne(
+        { ticketId: ticketId },
+        { $set: { responseMail: true } }
+      );
+      return res
+        .status(200)
+        .json({ success: true, message: "Email sent successfully" });
+    } catch (error) {
+      console.error("🚨 Error sending confirmation email:", error);
+      return { success: false, message: error.message };
+    }
+  };
   // Method to check if refresh token exists, and if it does, get the access token
   handleConsent = async (req, res) => {
     const userId = req.query.user_id;
@@ -346,74 +426,58 @@ class EmailControllers {
 
             console.log("Processing emailId:", emailId);
 
-            const existMail = await TicketModel.findOne({
-              emailId: emailId
-            });
-            if (existMail) {
-              // Fetch email details
-              const emailResponse =
-                await MicrosoftOutlookService.fetchEmailDetails(
-                  emailId,
-                  accessToken.access_token
-                );
-
-              console.log(
-                "fetchEmailsDEtails running __________________________________________________________",
-                emailResponse
-              );
-
-              const conversationId = emailResponse.conversationId;
-              const senderEmail = emailResponse.sender.emailAddress.address;
-              const senderName =
-                emailResponse.sender.emailAddress.name || "Unknown Sender";
-
-              // **Check for existing tickets**
-              const existingTicket = await TicketModel.findOne({
-                $or: [{ conversationId }, { emailId }]
-              });
-
-              if (existingTicket) {
-                console.log(
-                  `Existing ticket found for emailId: ${emailId} and ${conversationId}`
-                );
-
-                // If this is a reply, add it as a comment
-                if (existingTicket.conversationId === conversationId) {
-                  const isDuplicateComment = existingTicket.comments.some(
-                    (comment) => comment.commentId === emailId
-                  );
-                  if (!isDuplicateComment) {
-                    existingTicket.comments.push({
-                      commentId: emailId,
-                      senderName,
-                      senderEmail,
-                      content: emailResponse.body.content || "No content",
-                      role: "user",
-                      sentAt: new Date()
-                    });
-                    await existingTicket.save();
-                    console.log("Reply added as a comment.");
-                  } else {
-                    console.log("Duplicate comment detected, skipping.");
-                  }
-                }
-                return;
-              }
-            }
-
+            // Fetch email details
             const emailResponse =
               await MicrosoftOutlookService.fetchEmailDetails(
                 emailId,
                 accessToken.access_token
               );
+
+            console.log(
+              "fetchEmailsDEtails running __________________________________________________________",
+              emailResponse
+            );
+
             const conversationId = emailResponse.conversationId;
             const senderEmail = emailResponse.sender.emailAddress.address;
             const senderName =
               emailResponse.sender.emailAddress.name || "Unknown Sender";
-            // **Prevent duplicate ticket creation**
-            const alreadyExists = await TicketModel.findOne({
-              emailId: emailId
+
+            // **Check for existing tickets**
+            const existingTicket = await TicketModel.findOne({
+              $or: [{ conversationId }, { emailId }]
             });
+
+            if (existingTicket) {
+              console.log(
+                `Existing ticket found for emailId: ${emailId} and ${conversationId}`
+              );
+
+              // If this is a reply, add it as a comment
+              if (existingTicket.conversationId === conversationId) {
+                const isDuplicateComment = existingTicket.comments.some(
+                  (comment) => comment.commentId === emailId
+                );
+                if (!isDuplicateComment) {
+                  existingTicket.comments.push({
+                    commentId: emailId,
+                    senderName,
+                    senderEmail,
+                    content: emailResponse.body.content || "No content",
+                    role: "user",
+                    sentAt: new Date()
+                  });
+                  await existingTicket.save();
+                  console.log("Reply added as a comment.");
+                } else {
+                  console.log("Duplicate comment detected, skipping.");
+                }
+              }
+              return;
+            }
+
+            // **Prevent duplicate ticket creation**
+            const alreadyExists = await TicketModel.findOne({ emailId });
             if (alreadyExists) {
               console.log(`Skipping duplicate ticket for emailId: ${emailId}`);
               return;
@@ -438,8 +502,20 @@ class EmailControllers {
             await newTicket.save();
             console.log("New ticket created:", newTicket.ticketId);
 
+            // Call the `testing` API to send response email
+            const response = await axios.post(
+              "https://email-ticket-backend.vercel.app/api/ticket/email/testing",
+              {
+                accessToken: accessToken.access_token,
+                userEmail: senderEmail,
+                ticketId: newTicket.ticketId
+              }
+            );
+
+            console.log("response is", response);
+
             // const hasSentResponse = await TicketModel.findOne({
-            //   ticketId: newTicket.ticketId,
+            //   emailId,
             //   responseMail: true
             // });
             // try {
