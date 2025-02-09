@@ -94,26 +94,19 @@ class MicrosoftOutlookServices {
 
   sendConfirmationEmail = async (accessToken, userEmail, ticketId) => {
     try {
-      // Get Admin Email Dynamically
-      // const adminResponse = await fetch("https://graph.microsoft.com/v1.0/me", {
-      //   method: "GET",
-      //   headers: { Authorization: `Bearer ${accessToken}` }
-      // });
+      if (!accessToken) {
+        console.error("Access token is missing!");
+        return { success: false, message: "Access token is required" };
+      }
 
-      // if (!adminResponse.ok) {
-      //   throw new Error(
-      //     `Failed to fetch admin email: ${adminResponse.statusText}`
-      //   );
-      // }
+      if (!userEmail) {
+        console.error("User email is missing!");
+        return { success: false, message: "User email is required" };
+      }
 
-      // const adminData = await adminResponse.json();
-      // const adminEmail = adminData.mail || adminData.userPrincipalName;
-      // console.log("admin mail is adminEmail", adminEmail);
-
-      // if (!adminEmail) {
-      //   console.log("No admin email found");
-      //   return { success: false, message: "No admin email found" };
-      // }
+      console.log(
+        `Sending confirmation email to ${userEmail} for Ticket ID: ${ticketId}`
+      );
 
       // Email Body
       const emailBody = {
@@ -124,7 +117,6 @@ class MicrosoftOutlookServices {
             content: `We have received your request. Your Ticket ID is '${ticketId}'. We will resolve your issue as soon as possible.`
           },
           toRecipients: [{ emailAddress: { address: userEmail } }]
-          // ccRecipients: [{ emailAddress: { address: adminEmail } }]
         },
         saveToSentItems: "true"
       };
@@ -142,16 +134,22 @@ class MicrosoftOutlookServices {
         }
       );
 
+      const responseText = await emailResponse.text();
+
       if (!emailResponse.ok) {
-        throw new Error(`Failed to send email: ${emailResponse.statusText}`);
+        console.error(
+          `Failed to send email to ${userEmail}. Status: ${emailResponse.status}, Response: ${responseText}`
+        );
+        return {
+          success: false,
+          message: `Failed to send email: ${responseText}`
+        };
       }
 
-      console.log(
-        `Confirmation email sent to ${userEmail}: ${emailResponse.status}`
-      );
+      console.log(`✅ Confirmation email successfully sent to ${userEmail}`);
       return { success: true, message: "Email sent successfully" };
     } catch (error) {
-      console.error("Error sending confirmation email:", error);
+      console.error("🚨 Error sending confirmation email:", error);
       return { success: false, message: error.message };
     }
   };
