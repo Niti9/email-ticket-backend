@@ -19,7 +19,7 @@ class NewTicketService {
       const accessToken = await MicrosoftOutlookService.getAccessToken(
         tokenRecord.refresh_token
       );
-      if (!accessToken?.access_token) {
+      if (!accessToken?.data.access_token) {
         return console.error("Failed to retrieve access token.");
       }
 
