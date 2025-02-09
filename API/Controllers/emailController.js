@@ -386,7 +386,7 @@ class EmailControllers {
 
             // Check if the email already exists in the database
             const existingTicket = await TicketModel.findOne({
-              $or: [{ emailId }, { conversationId: conversationId }]
+              $or: [{ emailId }, { conversationId }]
             });
             console.log(
               "existing Ticket are here ->>>>>>>>>>>>>>>>>>>>>>>>",
@@ -396,51 +396,26 @@ class EmailControllers {
             if (existingTicket) {
               console.log(`Duplicate ticket detected for emailId: ${emailId}`);
 
-              // Prevent duplicate comments
-              const isDuplicateComment = existingTicket.comments.some(
-                (comment) => comment.commentId === conversationId
-              );
-              if (isDuplicateComment) {
+              // If conversation exists, update comments
+              if (existingTicket.conversationId === conversationId) {
                 console.log(
-                  `Duplicate comment detected for emailId: ${emailId}`
+                  `Adding a reply to the existing conversation for conversationId: ${conversationId}`
                 );
-                return;
-              } else {
-                console.log("no duplicate comment here");
-                return;
+                // Prevent duplicate comments
+                const isDuplicateComment = existingTicket.comments.some(
+                  (comment) => comment.commentId === conversationId
+                );
+                if (isDuplicateComment) {
+                  console.log(
+                    `Duplicate comment detected for emailId: ${emailId}`
+                  );
+                  return;
+                } else {
+                  console.log("no duplicate comment here");
+                  return;
+                }
               }
-            }
-
-            // Fetch email details only if it's not a duplicate
-            const emailData = await MicrosoftOutlookService.fetchEmailDetails(
-              emailId,
-              accessToken.access_token
-            );
-            if (!emailData) {
-              console.log("Email data not found.");
-              return;
-            }
-            console.log(
-              "this is emaildata \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\//////////////////////////////////////",
-              emailData
-            );
-
-            //  //Ensure `conversationId` is used for deduplication
-            // const conversationId = emailData.conversationId;
-            const isConversationExist = await TicketModel.findOne({
-              conversationId
-            });
-
-            console.log(
-              "isConversationExist*******************************",
-              isConversationExist
-            );
-
-            if (isConversationExist) {
-              console.log(
-                `Duplicate conversation detected for conversationId: ${conversationId}`
-              );
-              return;
+              return; //skip processing this notification further
             }
 
             // Create a new ticket if it does not exist
