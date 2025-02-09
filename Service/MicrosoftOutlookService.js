@@ -190,17 +190,17 @@ class MicrosoftOutlookServices {
       console.log("New ticket created:", newTicket.ticketId);
 
       // Call the `testing` API to send response email
-      const response = await axios.post(
-        "https://email-ticket-backend.vercel.app/api/ticket/testing",
-        {
-          accessToken: accessToken,
-          userEmail: senderEmail,
-          ticketId: newTicket.ticketId
-        }
-      );
+      // const response = await axios.post(
+      //   "https://email-ticket-backend.vercel.app/api/ticket/testing",
+      //   {
+      //     accessToken: accessToken,
+      //     userEmail: senderEmail,
+      //     ticketId: newTicket.ticketId
+      //   }
+      // );
 
-      console.log("response is", response.data);
-      return { success: true, message: "scuceadlkjsldk" };
+      // console.log("response is", response.data);
+      // return { success: true, message: "scuceadlkjsldk" };
     } catch (error) {
       console.log("hasSentREsponse error is here ", error);
     }
