@@ -373,11 +373,12 @@ class EmailControllers {
                 );
                 if (!isDuplicateComment) {
                   existingTicket.comments.push({
-                    commentId: emailId,
+                    commentId: emailResponse.id,
                     senderName,
                     senderEmail,
                     content: emailResponse.body.content || "No content",
-                    role: "user"
+                    role: "user",
+                    sentAt: new Date()
                   });
                   await existingTicket.save();
                   console.log("Reply added as a comment.");
@@ -412,42 +413,6 @@ class EmailControllers {
 
             await newTicket.save();
             console.log("New ticket created:", newTicket.ticketId);
-
-            // const hasSentResponse = await TicketModel.findOne({
-            //   emailId,
-            //   responseMail: true
-            // });
-            // if (!hasSentResponse) {
-            //   console.log("Sending confirmation email...");
-            //   //// ✅ Send response mail only if this new ticket hasn’t been responded to
-            //   if (!newTicket.responseMail) {
-            //     console.log("Sending confirmation email...");
-            //     const mailSent =
-            //       await MicrosoftOutlookService.sendConfirmationEmail(
-            //         accessToken.access_token,
-            //         senderEmail,
-            //         newTicket.ticketId
-            //       );
-
-            //     if (mailSent.success) {
-            //       await TicketModel.updateOne(
-            //         { _id: newTicket._id }, // ✅ Update only the new ticket
-            //         { $set: { responseMail: true } }
-            //       );
-            //       console.log(
-            //         `✅ Response mail sent for ticket: ${newTicket.ticketId}`
-            //       );
-            //     } else {
-            //       console.error(
-            //         `❌ Failed to send confirmation email for ticket: ${newTicket.ticketId}`
-            //       );
-            //     }
-            //   } else {
-            //     console.log(
-            //       `Skipping response email for ticket: ${newTicket.ticketId}, already sent.`
-            //     );
-            //   }
-            // }
           } catch (error) {
             console.error("Error processing notification:", error);
           }
