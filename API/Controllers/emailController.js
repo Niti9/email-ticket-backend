@@ -512,7 +512,7 @@ class EmailControllers {
               }
             );
 
-            console.log("response is", response);
+            console.log("response is", response.data);
 
             // const hasSentResponse = await TicketModel.findOne({
             //   emailId,
