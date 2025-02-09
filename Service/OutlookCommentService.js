@@ -1,5 +1,6 @@
 import axios from "axios";
 import MicrosoftOutlookService from "./MicrosoftOutlookService.js";
+import TicketModel from "../Database/models/EmailToken/ticketSchema.js";
 
 class OutlookCommentService {
   createComment = async (emailResponse) => {

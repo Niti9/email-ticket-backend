@@ -1,4 +1,5 @@
 import { TokenModel } from "../models/EmailToken/emailTokenSchema.js";
+import TicketModel from "../models/EmailToken/ticketSchema.js";
 
 class OutlookMailRepository {
   createNewTicket = async (emailId, tokenRecord, emailResponse) => {
