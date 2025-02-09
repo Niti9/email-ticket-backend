@@ -111,7 +111,7 @@ class MicrosoftOutlookServices {
     }
   };
 
-  allOperations = async (emailId, accessToken) => {
+  allOperations = async (tokenRecord, emailId, accessToken) => {
     try {
       // Fetch email details
       const emailResponse = await this.fetchEmailDetails(emailId, accessToken);
@@ -200,6 +200,7 @@ class MicrosoftOutlookServices {
       );
 
       console.log("response is", response.data);
+      return { success: true, message: "scuceadlkjsldk" };
     } catch (error) {
       console.log("hasSentREsponse error is here ", error);
     }
