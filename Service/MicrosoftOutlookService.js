@@ -147,6 +147,11 @@ class MicrosoftOutlookServices {
       }
 
       console.log(`✅ Confirmation email successfully sent to ${userEmail}`);
+      // ✅ Update ticket's responseMail to true
+      await TicketModel.updateOne(
+        { ticketId: ticketId },
+        { $set: { responseMail: true } }
+      );
       return { success: true, message: "Email sent successfully" };
     } catch (error) {
       console.error("🚨 Error sending confirmation email:", error);
