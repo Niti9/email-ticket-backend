@@ -413,11 +413,11 @@ class EmailControllers {
             await newTicket.save();
             console.log("New ticket created:", newTicket.ticketId);
 
-            await MicrosoftOutlookService.sendConfirmationEmail(
-              accessToken.access_token,
-              senderEmail,
-              newTicket.ticketId
-            );
+            // await MicrosoftOutlookService.sendConfirmationEmail(
+            //   accessToken.access_token,
+            //   senderEmail,
+            //   newTicket.ticketId
+            // );
 
             // ✅ Send response mail only if this new ticket hasn’t been responded to
             // if (!newTicket.responseMail) {
