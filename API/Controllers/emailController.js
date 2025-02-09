@@ -431,7 +431,7 @@ class EmailControllers {
               if (mailSent.success) {
                 await TicketModel.updateMany(
                   { senderEmail },
-                  { $set: { responseMailSent: true } }
+                  { $set: { responseMail: true } }
                 );
                 console.log(`✅ Response mail sent to ${senderEmail}`);
               } else {
