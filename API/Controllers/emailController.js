@@ -413,14 +413,8 @@ class EmailControllers {
             await newTicket.save();
             console.log("New ticket created:", newTicket.ticketId);
 
-            // **✅ Send response mail only once per sender**
-            const hasSentResponse = await TicketModel.findOne({
-              senderEmail,
-              responseMail: true
-            });
-            console.log("hasSentResponse is", hasSentResponse);
-
-            if (!hasSentResponse) {
+            // ✅ Send response mail only if this new ticket hasn’t been responded to
+            if (!newTicket.responseMail) {
               console.log("Sending confirmation email...");
               const mailSent =
                 await MicrosoftOutlookService.sendConfirmationEmail(
@@ -431,18 +425,20 @@ class EmailControllers {
 
               if (mailSent.success) {
                 await TicketModel.updateOne(
-                  { _id: newTicket._id }, // Update only the current ticket
+                  { _id: newTicket._id }, // ✅ Update only the new ticket
                   { $set: { responseMail: true } }
                 );
-                console.log(`✅ Response mail sent to ${senderEmail}`);
+                console.log(
+                  `✅ Response mail sent for ticket: ${newTicket.ticketId}`
+                );
               } else {
                 console.error(
-                  `❌ Failed to send confirmation email to ${senderEmail}`
+                  `❌ Failed to send confirmation email for ticket: ${newTicket.ticketId}`
                 );
               }
             } else {
               console.log(
-                `Skipping response email for ${senderEmail}, already sent.`
+                `Skipping response email for ticket: ${newTicket.ticketId}, already sent.`
               );
             }
           } catch (error) {
