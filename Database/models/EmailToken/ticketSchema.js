@@ -46,7 +46,7 @@ const ticketSchema = new mongoose.Schema({
     }
   ],
   responseMail: { type: Boolean, default: false }, // Added field
-
+  seen: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

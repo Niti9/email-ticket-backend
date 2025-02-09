@@ -108,6 +108,12 @@ EmailRoutes.get("/api/ticket/tickets", emailController.getallTickets);
 EmailRoutes.put("/api/ticket/tickets/:id", emailController.EditTicket);
 EmailRoutes.put("/api/ticket/tickets/:id", emailController.EditTicket);
 EmailRoutes.post("/api/ticket/testing", emailController.testing);
+EmailRoutes.get("/api/ticket/tickets/unseen", emailController.unseenTickets);
+EmailRoutes.patch("/api/ticket/tickets/seen/:id", emailController.seenTickets);
+EmailRoutes.patch(
+  "/api/ticket/tikets/seen-all",
+  emailController.seenAllTickets
+);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

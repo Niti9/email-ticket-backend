@@ -4,6 +4,30 @@ import TicketModel from "../../Database/models/EmailToken/ticketSchema.js";
 import cron from "node-cron";
 import MicrosoftOutlookService from "../../Service/MicrosoftOutlookService.js";
 class EmailControllers {
+  seenAllTickets = async (req, res) => {
+    try {
+      await TicketModel.updateMany({ seen: false }, { seen: true }); //seen false into see true
+      res.json({ message: "All notifications cleared" });
+    } catch (error) {
+      res.status(500).json({ message: "Error marking all as seen" });
+    }
+  };
+  seenTickets = async (req, res) => {
+    try {
+      await TicketModel.findByIdAndUpdate(req.params.id, { seen: true });
+      res.json({ message: "Ticket marked as seen" });
+    } catch (error) {
+      res.status(500).json({ message: "Error marking ticket as seen" });
+    }
+  };
+  unseenTickets = async (req, res) => {
+    try {
+      const unseenTickets = await TicketModel.find({ seen: false });
+      return res.status(200).json(unseenTickets);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching unseen tickets" });
+    }
+  };
   testing = async (req, res) => {
     try {
       const { accessToken, userEmail, ticketId } = req.body;
@@ -509,7 +533,8 @@ class EmailControllers {
               comments: [],
               priority: "Medium",
               status: "Open",
-              responseMail: false // ✅ Ensure initial state is false
+              responseMail: false,
+              seen: false
             });
 
             await newTicket.save();
