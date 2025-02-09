@@ -84,29 +84,29 @@ class EmailControllers {
   };
 
   // // Exchange authorization code for a refresh token
-  // getRefreshToken = async (code) => {
-  //   try {
-  //     const response = await axios.post(
-  //       "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-  //       new URLSearchParams({
-  //         client_id: process.env.CLIENT_ID,
-  //         client_secret: process.env.CLIENT_SECRET,
-  //         redirect_uri: process.env.REDIRECT_URI,
-  //         code: code,
-  //         grant_type: "authorization_code",
-  //         scope: "Mail.Read offline_access"
-  //       }).toString(),
-  //       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-  //     );
+  getRefreshToken = async (code) => {
+    try {
+      const response = await axios.post(
+        "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+        new URLSearchParams({
+          client_id: process.env.CLIENT_ID,
+          client_secret: process.env.CLIENT_SECRET,
+          redirect_uri: process.env.REDIRECT_URI,
+          code: code,
+          grant_type: "authorization_code",
+          scope: "Mail.Read offline_access"
+        }).toString(),
+        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+      );
 
-  //     console.log("this is refresh token here", response.data);
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("Error exchanging code for refresh token:", error);
-  //     // console.error("Error exchanging code for refresh token:", error.message);
-  //     throw error;
-  //   }
-  // };
+      console.log("this is refresh token here", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error exchanging code for refresh token:", error);
+      // console.error("Error exchanging code for refresh token:", error.message);
+      throw error;
+    }
+  };
 
   getRefreshToken = async (code) => {
     try {
@@ -422,45 +422,45 @@ class EmailControllers {
             await newTicket.save();
             console.log("New ticket created:", newTicket.ticketId);
 
-            const hasSentResponse = await TicketModel.findOne({
-              emailId,
-              responseMail: true
-            });
-            try {
-              if (!hasSentResponse) {
-                console.log("Sending confirmation email...");
-                //// ✅ Send response mail only if this new ticket hasn’t been responded to
-                if (!newTicket.responseMail) {
-                  console.log("Sending confirmation email...");
-                  const mailSent =
-                    await MicrosoftOutlookService.sendConfirmationEmail(
-                      accessToken.access_token,
-                      senderEmail,
-                      newTicket.ticketId
-                    );
+            // const hasSentResponse = await TicketModel.findOne({
+            //   emailId,
+            //   responseMail: true
+            // });
+            // try {
+            //   if (!hasSentResponse) {
+            //     console.log("Sending confirmation email...");
+            //     //// ✅ Send response mail only if this new ticket hasn’t been responded to
+            //     if (!newTicket.responseMail) {
+            //       console.log("Sending confirmation email...");
+            //       const mailSent =
+            //         await MicrosoftOutlookService.sendConfirmationEmail(
+            //           accessToken.access_token,
+            //           senderEmail,
+            //           newTicket.ticketId
+            //         );
 
-                  if (mailSent.success) {
-                    // await TicketModel.updateOne(
-                    //   { _id: newTicket._id }, // ✅ Update only the new ticket
-                    //   { $set: { responseMail: true } }
-                    // );
-                    console.log(
-                      `✅ Response mail sent for ticket: ${newTicket.ticketId}`
-                    );
-                  } else {
-                    console.error(
-                      `❌ Failed to send confirmation email for ticket: ${newTicket.ticketId}`
-                    );
-                  }
-                } else {
-                  console.log(
-                    `Skipping response email for ticket: ${newTicket.ticketId}, already sent.`
-                  );
-                }
-              }
-            } catch (error) {
-              console.log("hasSentREsponse error is here ", error);
-            }
+            //       if (mailSent.success) {
+            //         // await TicketModel.updateOne(
+            //         //   { _id: newTicket._id }, // ✅ Update only the new ticket
+            //         //   { $set: { responseMail: true } }
+            //         // );
+            //         console.log(
+            //           `✅ Response mail sent for ticket: ${newTicket.ticketId}`
+            //         );
+            //       } else {
+            //         console.error(
+            //           `❌ Failed to send confirmation email for ticket: ${newTicket.ticketId}`
+            //         );
+            //       }
+            //     } else {
+            //       console.log(
+            //         `Skipping response email for ticket: ${newTicket.ticketId}, already sent.`
+            //       );
+            //     }
+            //   }
+            // } catch (error) {
+            //   console.log("hasSentREsponse error is here ", error);
+            // }
           } catch (error) {
             console.error("Error processing notification:", error);
           }

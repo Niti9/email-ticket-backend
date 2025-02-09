@@ -2,7 +2,7 @@
 // import OutlookRepo from "../Database/repository/OutlookRepo.js";
 
 import axios from "axios";
-import TicketModel from "../Database/models/EmailToken/ticketSchema";
+import TicketModel from "../Database/models/EmailToken/ticketSchema.js";
 
 class MicrosoftOutlookServices {
   // Fetch email details function
