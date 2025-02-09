@@ -4,7 +4,7 @@ import TicketModel from "../Database/models/EmailToken/ticketSchema.js";
 import OutlookMailRepository from "../Database/repository/OutlookMailRepository.js";
 
 class OutlookTicketService {
-  createTicket = async (emailId, tokenRecord, emailResponse) => {
+  createTicket = async (emailId, tokenRecord, emailResponse, accessToken) => {
     const conversationId = emailResponse.conversationId;
     const senderEmail = emailResponse.sender.emailAddress.address;
     const senderName =
@@ -82,7 +82,7 @@ class OutlookTicketService {
     const response = await axios.post(
       "https://email-ticket-backend.vercel.app/api/ticket/testing",
       {
-        accessToken: accessToken.access_token,
+        accessToken: accessToken.data.access_token,
         userEmail: senderEmail,
         ticketId: newTicket.ticketId
       }

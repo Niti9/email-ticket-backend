@@ -42,7 +42,8 @@ class NewTicketService {
       const newOUtlookTicket = await OutlookTicketService.createTicket(
         emailId,
         tokenRecord,
-        emailResponse
+        emailResponse,
+        accessToken
       );
       console.log("new OUtlook Ticket are data are", newOUtlookTicket.data);
       return { success: true, message: "NewTicketSErvice is working " };
