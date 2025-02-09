@@ -418,6 +418,7 @@ class EmailControllers {
               senderEmail,
               responseMail: true
             });
+            console.log("hasSentResponse is", hasSentResponse);
 
             if (!hasSentResponse) {
               console.log("Sending confirmation email...");
@@ -429,8 +430,8 @@ class EmailControllers {
                 );
 
               if (mailSent.success) {
-                await TicketModel.updateMany(
-                  { senderEmail },
+                await TicketModel.updateOne(
+                  { _id: newTicket._id }, // Update only the current ticket
                   { $set: { responseMail: true } }
                 );
                 console.log(`✅ Response mail sent to ${senderEmail}`);
