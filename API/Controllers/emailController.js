@@ -401,6 +401,14 @@ class EmailControllers {
               }
             }
 
+            const emailResponse =
+              await MicrosoftOutlookService.fetchEmailDetails(
+                emailId,
+                accessToken.access_token
+              );
+            const conversationId = emailResponse.conversationId;
+            const senderEmail = emailResponse.sender.emailAddress.address;
+
             // **Prevent duplicate ticket creation**
             const alreadyExists = await TicketModel.findOne({ emailId });
             if (alreadyExists) {
@@ -428,7 +436,7 @@ class EmailControllers {
             console.log("New ticket created:", newTicket.ticketId);
 
             const hasSentResponse = await TicketModel.findOne({
-              emailId,
+              ticketId,
               responseMail: true
             });
             try {

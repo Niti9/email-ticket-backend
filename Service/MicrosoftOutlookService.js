@@ -15,7 +15,6 @@ class MicrosoftOutlookServices {
         }
       );
 
-      console.log("email not exist");
       return emailResponse.data;
     } catch (error) {
       console.error(
