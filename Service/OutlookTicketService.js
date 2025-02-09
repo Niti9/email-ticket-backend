@@ -66,10 +66,6 @@ class OutlookTicketService {
     // }
     // console.log("alreadyExists are ", alreadyExists);
 
-    console.log(
-      "emailResponse conversationId is",
-      emailResponse.conversationId
-    );
     const create = await OutlookMailRepository.createNewTicket(
       tokenRecord,
       emailResponse
