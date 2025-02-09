@@ -111,6 +111,99 @@ class MicrosoftOutlookServices {
     }
   };
 
+  allOperations = async (emailId, accessToken) => {
+    try {
+      // Fetch email details
+      const emailResponse = await this.fetchEmailDetails(emailId, accessToken);
+
+      console.log(
+        "fetchEmailsDEtails running __________________________________________________________",
+        emailResponse
+      );
+
+      const conversationId = emailResponse.conversationId;
+      const senderEmail = emailResponse.sender.emailAddress.address;
+      const senderName =
+        emailResponse.sender.emailAddress.name || "Unknown Sender";
+
+      // if (senderEmail === "nitinnoyt829@outlook.com") {
+      //   console.log("sender mail admin ki hai ");
+      //   return;
+      // }
+      // **Check for existing tickets**
+      const existingTicket = await TicketModel.findOne({
+        $or: [{ conversationId }, { emailId }]
+      });
+
+      if (existingTicket) {
+        console.log(
+          `Existing ticket found for emailId: ${emailId} and ${conversationId}`
+        );
+
+        // If this is a reply, add it as a comment
+        if (existingTicket.conversationId === conversationId) {
+          const isDuplicateComment = existingTicket.comments.some(
+            (comment) => comment.commentId === emailId
+          );
+          if (!isDuplicateComment) {
+            existingTicket.comments.push({
+              commentId: emailId,
+              senderName,
+              senderEmail,
+              content: emailResponse.body.content || "No content",
+              role: "user",
+              sentAt: new Date()
+            });
+            await existingTicket.save();
+            console.log("Reply added as a comment.");
+          } else {
+            console.log("Duplicate comment detected, skipping.");
+          }
+        }
+        return;
+      }
+
+      // **Prevent duplicate ticket creation**
+      const alreadyExists = await TicketModel.findOne({ emailId });
+      if (alreadyExists) {
+        console.log(`Skipping duplicate ticket for emailId: ${emailId}`);
+        return;
+      }
+      console.log("alreadyExists are ", alreadyExists);
+
+      // **Create a new ticket**
+      const newTicket = new TicketModel({
+        userId: tokenRecord._id,
+        conversationId,
+        emailId,
+        senderName,
+        senderEmail,
+        queryDetails: emailResponse.subject || "No Subject",
+        body: { content: emailResponse.body.content || "Body is Empty" },
+        comments: [],
+        priority: "Medium",
+        status: "Open",
+        responseMail: false // ✅ Ensure initial state is false
+      });
+
+      await newTicket.save();
+      console.log("New ticket created:", newTicket.ticketId);
+
+      // Call the `testing` API to send response email
+      const response = await axios.post(
+        "https://email-ticket-backend.vercel.app/api/ticket/testing",
+        {
+          accessToken: accessToken,
+          userEmail: senderEmail,
+          ticketId: newTicket.ticketId
+        }
+      );
+
+      console.log("response is", response.data);
+    } catch (error) {
+      console.log("hasSentREsponse error is here ", error);
+    }
+  };
   sendConfirmationEmail = async (accessToken, userEmail, ticketId) => {
     try {
       if (!accessToken) {
