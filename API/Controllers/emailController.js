@@ -413,40 +413,41 @@ class EmailControllers {
             await newTicket.save();
             console.log("New ticket created:", newTicket.ticketId);
 
-            // await MicrosoftOutlookService.sendConfirmationEmail(
-            //   accessToken.access_token,
-            //   senderEmail,
-            //   newTicket.ticketId
-            // );
+            const hasSentResponse = await TicketModel.findOne({
+              emailId,
+              responseMail: true
+            });
+            if (!hasSentResponse) {
+              console.log("Sending confirmation email...");
+              //// ✅ Send response mail only if this new ticket hasn’t been responded to
+              if (!newTicket.responseMail) {
+                console.log("Sending confirmation email...");
+                const mailSent =
+                  await MicrosoftOutlookService.sendConfirmationEmail(
+                    accessToken.access_token,
+                    senderEmail,
+                    newTicket.ticketId
+                  );
 
-            // ✅ Send response mail only if this new ticket hasn’t been responded to
-            // if (!newTicket.responseMail) {
-            //   console.log("Sending confirmation email...");
-            //   const mailSent =
-            //     await MicrosoftOutlookService.sendConfirmationEmail(
-            //       accessToken.access_token,
-            //       senderEmail,
-            //       newTicket.ticketId
-            //     );
-
-            //   if (mailSent.success) {
-            //     await TicketModel.updateOne(
-            //       { _id: newTicket._id }, // ✅ Update only the new ticket
-            //       { $set: { responseMail: true } }
-            //     );
-            //     console.log(
-            //       `✅ Response mail sent for ticket: ${newTicket.ticketId}`
-            //     );
-            //   } else {
-            //     console.error(
-            //       `❌ Failed to send confirmation email for ticket: ${newTicket.ticketId}`
-            //     );
-            //   }
-            // } else {
-            //   console.log(
-            //     `Skipping response email for ticket: ${newTicket.ticketId}, already sent.`
-            //   );
-            // }
+                if (mailSent.success) {
+                  await TicketModel.updateOne(
+                    { _id: newTicket._id }, // ✅ Update only the new ticket
+                    { $set: { responseMail: true } }
+                  );
+                  console.log(
+                    `✅ Response mail sent for ticket: ${newTicket.ticketId}`
+                  );
+                } else {
+                  console.error(
+                    `❌ Failed to send confirmation email for ticket: ${newTicket.ticketId}`
+                  );
+                }
+              } else {
+                console.log(
+                  `Skipping response email for ticket: ${newTicket.ticketId}, already sent.`
+                );
+              }
+            }
           } catch (error) {
             console.error("Error processing notification:", error);
           }
