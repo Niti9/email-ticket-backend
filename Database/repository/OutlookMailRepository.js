@@ -17,7 +17,7 @@ class OutlookMailRepository {
       conversationId: emailResponse?.conversationId,
       emailId,
       senderName: emailResponse?.sender?.emailAddress?.name || "Unknown Sender",
-      senderEmail: emailResponse.sender.emailAddress.addresss,
+      senderEmail: emailResponse.sender.emailAddress.address,
       queryDetails: emailResponse?.subject || "No Subject",
       body: { content: emailResponse?.body?.content || "Body is Empty" },
       comments: [],
