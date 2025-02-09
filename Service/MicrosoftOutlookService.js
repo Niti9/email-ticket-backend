@@ -2,29 +2,10 @@
 // import OutlookRepo from "../Database/repository/OutlookRepo.js";
 
 import axios from "axios";
-import TicketModel from "../Database/models/EmailToken/ticketSchema.js";
 
 class MicrosoftOutlookServices {
   // Fetch email details function
   fetchEmailDetails = async (emailId, accessToken) => {
-    try {
-      const emailResponse = await axios.get(
-        `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
-        {
-          headers: { Authorization: `Bearer ${accessToken}` }
-        }
-      );
-
-      return emailResponse.data;
-    } catch (error) {
-      console.error(
-        `Error fetching email details for emailId: ${emailId}`,
-        error
-      );
-      return null;
-    }
-  };
-  fetchEmailDetails2 = async (emailId, accessToken) => {
     try {
       const emailResponse = await axios.get(
         `https://graph.microsoft.com/v1.0/me/messages/${emailId}`,
@@ -111,117 +92,8 @@ class MicrosoftOutlookServices {
     }
   };
 
-  allOperations = async (tokenRecord, emailId, accessToken) => {
-    try {
-      // Fetch email details
-      const emailResponse = await this.fetchEmailDetails(emailId, accessToken);
-
-      console.log(
-        "fetchEmailsDEtails running __________________________________________________________",
-        emailResponse
-      );
-
-      const conversationId = emailResponse.conversationId;
-      const senderEmail = emailResponse.sender.emailAddress.address;
-      const senderName =
-        emailResponse.sender.emailAddress.name || "Unknown Sender";
-
-      // if (senderEmail === "nitinnoyt829@outlook.com") {
-      //   console.log("sender mail admin ki hai ");
-      //   return;
-      // }
-      // **Check for existing tickets**
-      const existingTicket = await TicketModel.findOne({
-        $or: [{ conversationId }, { emailId }]
-      });
-
-      if (existingTicket) {
-        console.log(
-          `Existing ticket found for emailId: ${emailId} and ${conversationId}`
-        );
-
-        // If this is a reply, add it as a comment
-        if (existingTicket.conversationId === conversationId) {
-          const isDuplicateComment = existingTicket.comments.some(
-            (comment) => comment.commentId === emailId
-          );
-          if (!isDuplicateComment) {
-            existingTicket.comments.push({
-              commentId: emailId,
-              senderName,
-              senderEmail,
-              content: emailResponse.body.content || "No content",
-              role: "user",
-              sentAt: new Date()
-            });
-            await existingTicket.save();
-            console.log("Reply added as a comment.");
-          } else {
-            console.log("Duplicate comment detected, skipping.");
-          }
-        }
-        return;
-      }
-
-      // **Prevent duplicate ticket creation**
-      const alreadyExists = await TicketModel.findOne({ emailId });
-      if (alreadyExists) {
-        console.log(`Skipping duplicate ticket for emailId: ${emailId}`);
-        return;
-      }
-      console.log("alreadyExists are ", alreadyExists);
-
-      // **Create a new ticket**
-      const newTicket = new TicketModel({
-        userId: tokenRecord._id,
-        conversationId,
-        emailId,
-        senderName,
-        senderEmail,
-        queryDetails: emailResponse.subject || "No Subject",
-        body: { content: emailResponse.body.content || "Body is Empty" },
-        comments: [],
-        priority: "Medium",
-        status: "Open",
-        responseMail: false // ✅ Ensure initial state is false
-      });
-
-      await newTicket.save();
-      console.log("New ticket created:", newTicket.ticketId);
-
-      // Call the `testing` API to send response email
-      // const response = await axios.post(
-      //   "https://email-ticket-backend.vercel.app/api/ticket/testing",
-      //   {
-      //     accessToken: accessToken,
-      //     userEmail: senderEmail,
-      //     ticketId: newTicket.ticketId
-      //   }
-      // );
-
-      // console.log("response is", response.data);
-      // return { success: true, message: "scuceadlkjsldk" };
-    } catch (error) {
-      console.log("hasSentREsponse error is here ", error);
-    }
-  };
   sendConfirmationEmail = async (accessToken, userEmail, ticketId) => {
     try {
-      if (!accessToken) {
-        console.error("Access token is missing!");
-        return { success: false, message: "Access token is required" };
-      }
-
-      if (!userEmail) {
-        console.error("User email is missing!");
-        return { success: false, message: "User email is required" };
-      }
-
-      console.log(
-        `Sending confirmation email to ${userEmail} for Ticket ID: ${ticketId}`
-      );
-
-      // Email Body
       const emailBody = {
         message: {
           subject: `Your Ticket is Raised - Ticket ID: ${ticketId}`,
@@ -230,6 +102,7 @@ class MicrosoftOutlookServices {
             content: `We have received your request. Your Ticket ID is '${ticketId}'. We will resolve your issue as soon as possible.`
           },
           toRecipients: [{ emailAddress: { address: userEmail } }]
+          // ccRecipients: [{ emailAddress: { address: adminEmail } }]
         },
         saveToSentItems: "true"
       };
@@ -247,27 +120,16 @@ class MicrosoftOutlookServices {
         }
       );
 
-      const responseText = await emailResponse.text();
-
       if (!emailResponse.ok) {
-        console.error(
-          `Failed to send email to ${userEmail}. Status: ${emailResponse.status}, Response: ${responseText}`
-        );
-        return {
-          success: false,
-          message: `Failed to send email: ${responseText}`
-        };
+        throw new Error(`Failed to send email: ${emailResponse.statusText}`);
       }
 
-      console.log(`✅ Confirmation email successfully sent to ${userEmail}`);
-      // ✅ Update ticket's responseMail to true
-      await TicketModel.updateOne(
-        { ticketId: ticketId },
-        { $set: { responseMail: true } }
+      console.log(
+        `Confirmation email sent to ${userEmail}: ${emailResponse.status}`
       );
       return { success: true, message: "Email sent successfully" };
     } catch (error) {
-      console.error("🚨 Error sending confirmation email:", error);
+      console.error("Error sending confirmation email:", error);
       return { success: false, message: error.message };
     }
   };
