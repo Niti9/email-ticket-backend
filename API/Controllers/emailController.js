@@ -441,45 +441,28 @@ class EmailControllers {
               priority: "Medium",
               status: "Open"
             });
-            const value = await newTicket.save();
+            await newTicket.save();
 
-            console.log("values@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", value);
-            // // ✅ Stop confirmation email from triggering webhook again
-            // if (!emailResponse.isReply) {
-            //   console.log("Sending confirmation email...");
-            //   const mailSent =
-            //     await MicrosoftOutlookService.sendConfirmationEmail(
-            //       accessToken.access_token,
-            //       emailResponse.sender.emailAddress.address,
-            //       newTicket.ticketId
-            //     );
+            // ✅ Stop confirmation email from triggering webhook again
+            if (!newTicket.responseMail) {
+              console.log("Sending confirmation email...");
+              const mailSent =
+                await MicrosoftOutlookService.sendConfirmationEmail(
+                  accessToken.access_token,
+                  emailResponse.sender.emailAddress.address,
+                  newTicket.ticketId
+                );
 
-            //   if (mailSent.success) {
-            //     newTicket.responseMail = true;
-            //     await newTicket.save();
-            //     console.log("Response mail sent successfully.");
-            //   } else {
-            //     console.error("Failed to send confirmation email.");
-            //   }
-            // } else {
-            //   console.log("Skipping confirmation email to prevent loop.");
-            // }
-
-            // // // Send confirmation email
-            // const mailSent =
-            //   await MicrosoftOutlookService.sendConfirmationEmail(
-            //     accessToken.access_token,
-            //     emailResponse.sender.emailAddress.address,
-            //     newTicket.ticketId
-            //   );
-
-            // if (mailSent.success) {
-            //   newTicket.responseMail = true;
-            //   await newTicket.save();
-            //   console.log("Response mail sent successfully.");
-            // } else {
-            //   console.error("Failed to send confirmation email.");
-            // }
+              if (mailSent.success) {
+                newTicket.responseMail = true;
+                await newTicket.save();
+                console.log("Response mail sent successfully.");
+              } else {
+                console.error("Failed to send confirmation email.");
+              }
+            } else {
+              console.log("Skipping confirmation email to prevent loop.");
+            }
           } catch (error) {
             console.error("Error processing notification for emailId:", error);
             console.log(
