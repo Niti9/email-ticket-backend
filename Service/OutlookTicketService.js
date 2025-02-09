@@ -84,7 +84,7 @@ class OutlookTicketService {
       {
         accessToken: accessToken.data.access_token,
         userEmail: senderEmail,
-        emailId
+        ticketId: emailId
         // ticketId: newTicket.ticketId
       }
     );
