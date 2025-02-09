@@ -72,23 +72,32 @@ class OutlookTicketService {
       emailResponse
     );
     console.log("New ticket created:))))))))))))))))", create.ticketId);
+    // return {
+    //   success: true,
+    //   message: "New Ticket Generate successfully",
+    //   data: create
+    // };
+
+    // Call the `testing` API to send response email
+    const response = await axios.post(
+      "https://email-ticket-backend.vercel.app/api/ticket/testing",
+      {
+        accessToken: accessToken.access_token,
+        userEmail: senderEmail,
+        ticketId: newTicket.ticketId
+      }
+    );
+
+    console.log(
+      "sent response back mail response are ***********",
+      response.data
+    );
+
     return {
       success: true,
       message: "New Ticket Generate successfully",
       data: create
     };
-
-    // // Call the `testing` API to send response email
-    // const response = await axios.post(
-    //   "https://email-ticket-backend.vercel.app/api/ticket/testing",
-    //   {
-    //     accessToken: accessToken.access_token,
-    //     userEmail: senderEmail,
-    //     ticketId: newTicket.ticketId
-    //   }
-    // );
-
-    // console.log("response is", response.data);
 
     // const hasSentResponse = await TicketModel.findOne({
     //   emailId,

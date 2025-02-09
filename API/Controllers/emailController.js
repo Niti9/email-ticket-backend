@@ -4,6 +4,7 @@ import TicketModel from "../../Database/models/EmailToken/ticketSchema.js";
 import cron from "node-cron";
 import MicrosoftOutlookService from "../../Service/MicrosoftOutlookService.js";
 import NewTicketService from "../../Service/NewTicketService.js";
+import OutlookMailRepository from "../../Database/repository/OutlookMailRepository.js";
 class EmailControllers {
   seenAllTickets = async (req, res) => {
     try {
@@ -54,8 +55,11 @@ class EmailControllers {
         `Sending confirmation email to ${userEmail} for Ticket ID: ${ticketId}`
       );
 
-      // **Check if response mail was already sent**
-      const existingTicket = await TicketModel.findOne({ ticketId });
+      // // **Check if response mail was already sent**
+      const existingTicket = await OutlookMailRepository.EmailIdAlreadyExists(
+        ticketId
+      );
+      // const existingTicket = await TicketModel.findOne({ ticketId });
       if (existingTicket?.responseMail) {
         console.log(
           `⚠️ Email already sent for Ticket ID: ${ticketId}, skipping.`

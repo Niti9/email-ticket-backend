@@ -46,46 +46,6 @@ class NewTicketService {
       );
       console.log("new OUtlook Ticket are data are", newOUtlookTicket.data);
       return { success: true, message: "NewTicketSErvice is working " };
-
-      // const hasSentResponse = await TicketModel.findOne({
-      //   emailId,
-      //   responseMail: true
-      // });
-      // try {
-      //   if (!hasSentResponse) {
-      //     console.log("Sending confirmation email...");
-      //     //// ✅ Send response mail only if this new ticket hasn’t been responded to
-      //     if (!newTicket.responseMail) {
-      //       console.log("Sending confirmation email...");
-      //       const mailSent =
-      //         await MicrosoftOutlookService.sendConfirmationEmail(
-      //           accessToken.access_token,
-      //           senderEmail,
-      //           newTicket.ticketId
-      //         );
-
-      //       if (mailSent.success) {
-      //         // await TicketModel.updateOne(
-      //         //   { _id: newTicket._id }, // ✅ Update only the new ticket
-      //         //   { $set: { responseMail: true } }
-      //         // );
-      //         console.log(
-      //           `✅ Response mail sent for ticket: ${newTicket.ticketId}`
-      //         );
-      //       } else {
-      //         console.error(
-      //           `❌ Failed to send confirmation email for ticket: ${newTicket.ticketId}`
-      //         );
-      //       }
-      //     } else {
-      //       console.log(
-      //         `Skipping response email for ticket: ${newTicket.ticketId}, already sent.`
-      //       );
-      //     }
-      //   }
-      // } catch (error) {
-      //   console.log("hasSentREsponse error is here ", error);
-      // }
     } catch (error) {
       console.error("Error processing notification:", error);
     }
