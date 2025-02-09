@@ -405,6 +405,9 @@ class EmailControllers {
                   `Duplicate comment detected for emailId: ${emailId}`
                 );
                 return;
+              } else {
+                console.log("no duplicate comment here");
+                return;
               }
             }
 
@@ -471,12 +474,6 @@ class EmailControllers {
             // } else {
             //   console.error("Failed to send confirmation email.");
             // }
-            if (mailSent.success) {
-              newTicket.responseMail = true;
-              await newTicket.save();
-            } else {
-              console.error("Failed to send confirmation email.");
-            }
           } catch (error) {
             console.error("Error processing notification for emailId:", error);
             console.log(
