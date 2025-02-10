@@ -7,7 +7,7 @@ class OutlookMailRepository {
     const newTicket = new TicketModel({
       userId: tokenRecord?._id,
       conversationId: emailResponse?.conversationId,
-      emailId,
+      emailId: emailResponse.id,
       senderName: emailResponse?.sender?.emailAddress?.name || "Unknown Sender",
       senderEmail: emailResponse.sender.emailAddress.address,
       queryDetails: emailResponse?.subject || "No Subject",
@@ -35,7 +35,7 @@ class OutlookMailRepository {
 
   Addcomment = async (emailId, emailResponse, existingTicket) => {
     existingTicket.comments.push({
-      commentId: emailId,
+      commentId: emailResponse.id,
       senderName: emailResponse.sender.emailAddress.name || "Unknown Sender",
       senderEmail: emailResponse.sender.emailAddress.address,
       content: emailResponse.body.content || "No content",
