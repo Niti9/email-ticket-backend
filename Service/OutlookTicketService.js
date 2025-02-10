@@ -10,68 +10,11 @@ class OutlookTicketService {
     const senderName =
       emailResponse.sender.emailAddress.name || "Unknown Sender";
 
-    // if (senderEmail === "nitinnoyt829@outlook.com") {
-    //   console.log("sender mail admin ki hai ");
-    //   const conversationExist = await TicketModel.findOne({
-    //     conversationId
-    //   });
-    //   if (conversationExist) {
-    //     console.log(
-    //       "our conversationg already exists +++++++++++++++++",
-    //       conversationExist
-    //     );
-    //   }
-
-    //   return;
-    // }
-    // // **Check for existing tickets**
-    // const existingTicket = await TicketModel.findOne({
-    //   $or: [{ conversationId }, { emailId }]
-    // });
-
-    // if (existingTicket) {
-    //   console.log(
-    //     `Existing ticket found for emailId: ${emailId} and ${conversationId}`
-    //   );
-
-    //   // If this is a reply, add it as a comment
-    //   if (existingTicket.conversationId === conversationId) {
-    //     const isDuplicateComment = existingTicket.comments.some(
-    //       (comment) => comment.commentId === emailId
-    //     );
-    //     if (!isDuplicateComment) {
-    //       existingTicket.comments.push({
-    //         commentId: emailId,
-    //         senderName,
-    //         senderEmail,
-    //         content: emailResponse.body.content || "No content",
-    //         role: "user",
-    //         sentAt: new Date()
-    //       });
-    //       await existingTicket.save();
-    //       console.log("Reply added as a comment.");
-    //     } else {
-    //       console.log("Duplicate comment detected, skipping.");
-    //     }
-    //   }
-    //   return;
-    // }
-
-    // **Prevent duplicate ticket creation**
-
-    // const alreadyExists = OutlookMailRepository.EmailIdAlreadyExists(emailId);
-    // if (alreadyExists) {
-    //   console.log(`Skipping duplicate ticket for emailId: ${emailId}`);
-    //   return { success: false, message: "alreadyExists error" };
-    // }
-    // console.log("alreadyExists are ", alreadyExists);
-
     const create = await OutlookMailRepository.createNewTicket(
       emailId,
       tokenRecord,
       emailResponse
     );
-    console.log("New ticket created:))))))))))))))))", create.ticketId);
     return {
       success: true,
       message: "New Ticket Generate successfully",

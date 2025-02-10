@@ -1,44 +1,47 @@
 import axios from "axios";
 import MicrosoftOutlookService from "./MicrosoftOutlookService.js";
 import TicketModel from "../Database/models/EmailToken/ticketSchema.js";
+import OutlookMailRepository from "../Database/repository/OutlookMailRepository.js";
 
 class OutlookCommentService {
-  createComment = async (emailResponse) => {
-    // **Check for existing tickets**
-    const existingTicket = await TicketModel.findOne({
-      $or: [
-        { conversationId: emailResponse.conversationId },
-        { emailId: emailId }
-      ]
-    });
+  createComment = async (emailId, emailResponse, existingTicket) => {
+    const conversationId = emailResponse.conversationId;
 
-    if (existingTicket) {
-      console.log(
-        `Existing ticket found for emailId: ${emailId} and ${conversationId}`
+    // If this is a reply, add it as a comment
+    if (existingTicket.conversationId === conversationId) {
+      // const isDuplicateComment = existingTicket.comments.some(
+      //   (comment) => comment.commentId === emailId
+      // );
+      // if (!isDuplicateComment) {
+      //   const saveComment = await OutlookMailRepository.Addcomment(
+      //     emailId,
+      //     emailResponse,
+      //     existingTicket
+      //   );
+      //   console.log("Reply added as a comment.", saveComment);
+      //   return {
+      //     success: true,
+      //     message: "Reply added as comment in Database"
+      //   };
+      // } else {
+      //   console.log("Duplicate comment detected, skipping.");
+      // }
+
+      const saveComment = await OutlookMailRepository.Addcomment(
+        emailId,
+        emailResponse,
+        existingTicket
       );
-
-      // If this is a reply, add it as a comment
-      if (existingTicket.conversationId === conversationId) {
-        const isDuplicateComment = existingTicket.comments.some(
-          (comment) => comment.commentId === emailId
-        );
-        if (!isDuplicateComment) {
-          existingTicket.comments.push({
-            commentId: emailId,
-            senderName,
-            senderEmail,
-            content: emailResponse.body.content || "No content",
-            role: "user",
-            sentAt: new Date()
-          });
-          await existingTicket.save();
-          console.log("Reply added as a comment.");
-        } else {
-          console.log("Duplicate comment detected, skipping.");
-        }
-      }
-      return;
+      console.log("Reply added as a comment.", saveComment);
+      return {
+        success: true,
+        message: "Reply added as comment in Database"
+      };
     }
+    return {
+      success: false,
+      message: "Sorry Conversation Id not match with any existing ticket"
+    };
   };
 }
 export default new OutlookCommentService();

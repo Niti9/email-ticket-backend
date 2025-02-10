@@ -72,10 +72,11 @@ class EmailControllers {
       // Email Body
       const emailBody = {
         message: {
-          subject: `Your Ticket is Raised - Ticket ID: ${ticketId}`,
+          subject: `Your Ticket is Raised - Ticket ID: ${existingTicket.ticketId}`,
+          // subject: `Your Ticket is Raised - Ticket ID: ${ticketId}`,
           body: {
             contentType: "Text",
-            content: `We have received your request. Your Ticket ID is '${ticketId}'. We will resolve your issue as soon as possible.`
+            content: `We have received your request. Your Ticket ID is '${existingTicket.ticketId}'. We will resolve your issue as soon as possible.`
           },
           toRecipients: [{ emailAddress: { address: userEmail } }]
         },
