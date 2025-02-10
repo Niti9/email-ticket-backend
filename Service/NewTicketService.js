@@ -1,6 +1,3 @@
-// import { TokenModel } from "../Database/models/EmailToken/emailTokenSchema.js";
-// import OutlookRepo from "../Database/repository/OutlookRepo.js";
-
 import axios from "axios";
 import { TokenModel } from "../Database/models/EmailToken/emailTokenSchema.js";
 import MicrosoftOutlookService from "./MicrosoftOutlookService.js";
@@ -12,9 +9,11 @@ class NewTicketService {
   webhookOperations = async (notification) => {
     try {
       const userId = notification.clientState;
+      console.log("user id is ", notification.clientState);
       if (!userId) return console.warn("Missing userId in notification.");
 
       const tokenRecord = await TokenModel.findOne({ user_id: userId });
+      console.log("token Record are ", tokenRecord);
       if (!tokenRecord)
         return console.warn(`No token record for user: ${userId}`);
 
