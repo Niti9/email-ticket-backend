@@ -46,7 +46,7 @@ class NewTicketService {
         emailResponse.conversationId
       );
 
-      if (existingTicket) {
+      if (existingTicket === true) {
         const addComment = await OutlookCommentService.createComment(
           emailId,
           emailResponse,
