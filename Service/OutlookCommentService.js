@@ -24,7 +24,10 @@ class OutlookCommentService {
           message: "Reply added as comment in Database"
         };
       } else {
-        console.log("Duplicate comment detected, skipping.");
+        return {
+          success: false,
+          message: "Duplicate Comment Detected skipping;"
+        };
       }
     }
     return {
