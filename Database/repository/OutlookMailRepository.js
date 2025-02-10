@@ -26,14 +26,11 @@ class OutlookMailRepository {
     return await TicketModel.findOne({ emailId });
   };
 
-  FindConversationIdAndEmail = async (
-    emailId,
-
-    conversationId
-  ) => {
-    return await TicketModel.findOne({
-      $or: [{ conversationId: conversationId }, { emailId: emailId }]
-    });
+  FindConversationIdAndEmail = async (emailId, conversationId) => {
+    return await TicketModel.findOne({ conversationId });
+    // return await TicketModel.findOne({
+    //   $or: [{ conversationId: conversationId }, { emailId: emailId }]
+    // });
   };
 
   Addcomment = async (emailId, emailResponse, existingTicket) => {

@@ -41,12 +41,13 @@ class NewTicketService {
         emailResponse
       );
 
-      const existingTicket = OutlookMailRepository.FindConversationIdAndEmail(
-        emailId,
-        emailResponse.conversationId
-      );
+      const existingTicket =
+        await OutlookMailRepository.FindConversationIdAndEmail(
+          emailId,
+          emailResponse.conversationId
+        );
 
-      if (existingTicket === true) {
+      if (existingTicket) {
         const addComment = await OutlookCommentService.createComment(
           emailId,
           emailResponse,
