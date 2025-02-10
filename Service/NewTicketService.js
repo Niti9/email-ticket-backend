@@ -9,11 +9,9 @@ class NewTicketService {
   webhookOperations = async (notification) => {
     try {
       const userId = notification.clientState;
-      console.log("user id is ", notification.clientState);
       if (!userId) return console.warn("Missing userId in notification.");
 
       const tokenRecord = await TokenModel.findOne({ user_id: userId });
-      console.log("token Record are ", tokenRecord);
       if (!tokenRecord)
         return console.warn(`No token record for user: ${userId}`);
 
@@ -27,6 +25,7 @@ class NewTicketService {
       const emailId = notification.resource.split("/").pop();
       if (!emailId) return console.error("Invalid emailId in notification.");
 
+      console.log("notification is ", notification);
       console.log("Processing emailId:", emailId);
 
       // Fetch email details
