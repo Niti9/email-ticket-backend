@@ -440,17 +440,34 @@ class EmailControllers {
       }
 
       const notifications = req.body.value;
+      console.log("notifications are", notifications);
       if (!notifications || notifications.length === 0) {
         console.log("No notifications received.");
         return res.status(204).send("No notifications received.");
       }
 
-      await Promise.all(
-        notifications.map(async (notification) => {
-          const data = await NewTicketService.webhookOperations(notification);
-          console.log("data is", data);
-        })
-      );
+      const notification = {
+        subscriptionId: "109b4719-ebdb-401f-9990-4c3eb027ba0e",
+        subscriptionExpirationDateTime: "2025-02-17T18:30:01.43+00:00",
+        changeType: "created",
+        resource:
+          "Users/924304495c60cab3/Messages/AQMkADAwATM0MDAAMi04NjNhLWEzMGMtMDACLTAwCgBGAAADaP9ss4XKygBEvIXLgwOx84EHAMD7k9GdyVtDiHguHJ5J8FYAAAIBDAAAAMD7k9GdyVtDiHguHJ5J8FYAAAAT5YUnAAAA",
+        resourceData: {
+          "@odata.type": "#Microsoft.Graph.Message",
+          "@odata.id":
+            "Users/924304495c60cab3/Messages/AQMkADAwATM0MDAAMi04NjNhLWEzMGMtMDACLTAwCgBGAAADaP9ss4XKygBEvIXLgwOx84EHAMD7k9GdyVtDiHguHJ5J8FYAAAIBDAAAAMD7k9GdyVtDiHguHJ5J8FYAAAAT5YUnAAAA",
+          "@odata.etag": 'W/"CQAAABYAAADA+5PRnclbQ4h4LhyeSfBWAAAT4NUr"',
+          id: "AQMkADAwATM0MDAAMi04NjNhLWEzMGMtMDACLTAwCgBGAAADaP9ss4XKygBEvIXLgwOx84EHAMD7k9GdyVtDiHguHJ5J8FYAAAIBDAAAAMD7k9GdyVtDiHguHJ5J8FYAAAAT5YUnAAAA"
+        },
+        clientState: "6746e5a86a0dee2ed8b2cd4f",
+        tenantId: ""
+      };
+      // await Promise.all(
+      //   notifications.map(async (notification) => {
+      const data = await NewTicketService.webhookOperations(notification);
+      console.log("data is", data);
+      //   })
+      // );
 
       return res.status(202).send("Notifications processed.");
     } catch (error) {
