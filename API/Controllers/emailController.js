@@ -464,7 +464,7 @@ class EmailControllers {
       // };
       // await Promise.all(
       //   notifications.map(async (notification) => {
-      const data = await NewTicketService.webhookOperations(notification);
+      const data = await NewTicketService.webhookOperations(notifications);
       console.log("data is", data);
       //   })
       // );
