@@ -40,19 +40,20 @@ class NewTicketService {
         "fetchEmailsDEtails running __________________________________________________________",
         emailResponse
       );
+      console.log(" first thing ", emailResponse.from.emailAddress.address);
+      console.log("second thing is ", tokenRecord.user_outlook_email);
 
       // get the email details first and then comparee with the appuserschema . email
       // example
       if (
-        emailResponse.from.emailAddress.address ===
-        tokenRecord.user_outlook_email
+        emailResponse?.from?.emailAddress?.address ===
+        tokenRecord?.user_outlook_email
       ) {
         console.log("Ignoring self-triggered notification");
-        return res
-          .status(200)
-          .send(
-            `error of sending message from ${tokenRecord.user_outlook_email} this email `
-          );
+        return {
+          success: false,
+          message: `Ignoring message from ${tokenRecord.user_outlook_email}`
+        };
       }
 
       const existingTicket =
