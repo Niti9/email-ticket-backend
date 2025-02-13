@@ -58,7 +58,7 @@ class NewTicketService {
       if (
         emailResponse.data.from?.emailAddress?.address &&
         tokenRecord.user_outlook_email &&
-        emailResponse.from.emailAddress.address.toLowerCase().trim() ===
+        emailResponse.data.from.emailAddress.address.toLowerCase().trim() ===
           tokenRecord.user_outlook_email.toLowerCase().trim()
       ) {
         console.log("Ignoring self-triggered notification");
