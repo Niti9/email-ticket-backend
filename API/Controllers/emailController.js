@@ -179,13 +179,10 @@ class EmailControllers {
       // // );
 
       // Exchange the authorization code for refresh token
-      const tokenResponse = await this.getRefreshToken(code);
-
-      // Save the refresh token in the database
-      await TokenModel.updateOne(
-        { user_id: userId },
-        { refresh_token: tokenResponse.refresh_token },
-        { upsert: true }
+      const tokenResponse = await MicrosoftOutlookService.getRefreshToken(
+        code,
+        userId,
+        appusername
       );
 
       const subscription = await MicrosoftOutlookService.automaticSubscription(

@@ -2,6 +2,7 @@
 // import OutlookRepo from "../Database/repository/OutlookRepo.js";
 
 import axios from "axios";
+import OutlookRepo from "../Database/repository/OutlookRepo";
 
 class MicrosoftOutlookServices {
   // Fetch email details function
@@ -136,6 +137,122 @@ class MicrosoftOutlookServices {
       throw error;
     }
   };
+  getRefreshToken = async (code, userId, appusername) => {
+    try {
+      const response = await fetch(
+        "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: new URLSearchParams({
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET,
+            redirect_uri: process.env.REDIRECT_URI,
+            code: code,
+            grant_type: "authorization_code",
+            scope: "Mail.Read Mail.Send User.Read"
+            // scope: "Mail.Read Mail.Send"
+            // scope: "Mail.Read offline_access"
+          }).toString()
+        }
+      );
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(
+          `HTTP error! status: ${response.status}, message: ${errorMessage}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("This is the refresh token:", data);
+
+      // Step 2: Fetch user's email from Graph API
+      const userEmail = await this.getUserEmail(data.access_token);
+
+      const accessTokenNewValue = await OutlookRepo.AddorUpdateUserById(
+        userId,
+        data.refresh_token,
+        appusername,
+        userEmail
+      );
+
+      if (!accessTokenNewValue) {
+        return {
+          success: false,
+          message: "refresh token not stored or updated successfully",
+          data: null
+        };
+      }
+      return {
+        success: true,
+        message: "refresh token updated successfully",
+        data: data
+      };
+    } catch (error) {
+      console.error("Error exchanging code for refresh token:", error);
+      // console.error("Error exchanging code for refresh token:", error.message);
+      throw error;
+    }
+  };
+  // getRefreshToken = async (code, userId, appusername) => {
+  //   try {
+  //     const response = await fetch(
+  //       "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/x-www-form-urlencoded"
+  //         },
+  //         body: new URLSearchParams({
+  //           client_id: process.env.CLIENT_ID,
+  //           client_secret: process.env.CLIENT_SECRET,
+  //           redirect_uri: process.env.REDIRECT_URI,
+  //           code: code,
+  //           grant_type: "authorization_code",
+  //           scope: "Mail.Read Mail.Send User.Read"
+  //           // scope: "Mail.Read Mail.Send"
+  //           // scope: "Mail.Read offline_access"
+  //         }).toString()
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       const errorMessage = await response.text();
+  //       throw new Error(
+  //         `HTTP error! status: ${response.status}, message: ${errorMessage}`
+  //       );
+  //     }
+
+  //     const data = await response.json();
+  //     console.log("This is the refresh token:", data);
+
+  //     const accessTokenNewValue = await OutlookRepo.AddorUpdateUserById(
+  //       userId,
+  //       data.refresh_token,
+  //       appusername
+  //     );
+
+  //     if (!accessTokenNewValue) {
+  //       return {
+  //         success: false,
+  //         message: "refresh token not stored or updated successfully",
+  //         data: null
+  //       };
+  //     }
+  //     return {
+  //       success: true,
+  //       message: "refresh token updated successfully",
+  //       data: data
+  //     };
+  //   } catch (error) {
+  //     console.error("Error exchanging code for refresh token:", error);
+  //     // console.error("Error exchanging code for refresh token:", error.message);
+  //     throw error;
+  //   }
+  // };
   sendConfirmationEmail = async (accessToken, userEmail, ticketId) => {
     try {
       const emailBody = {
@@ -204,6 +321,21 @@ class MicrosoftOutlookServices {
     } catch (error) {
       console.error("Error fetching attachments:", error);
       return [];
+    }
+  };
+
+  getUserEmail = async (accessToken) => {
+    const url = "https://graph.microsoft.com/v1.0/me";
+
+    try {
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+
+      return response.data.mail || response.data.userPrincipalName; // Email address
+    } catch (error) {
+      console.error("Error fetching user email:", error.response?.data);
+      throw error;
     }
   };
 }
