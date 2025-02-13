@@ -190,11 +190,17 @@ class MicrosoftOutlookServices {
         }
       );
 
+      if (!response.ok) {
+        throw new Error(`Failed to fetch attachments: ${response.statusText}`);
+      }
+
+      const data = await response.json(); // Properly parse JSON response
+
       console.log(
-        "response data value for email attachement are _--------------------------------"
-          .response?.data?.value
+        "response data value for email attachement are _--------------------------------",
+        data?.value
       );
-      return response.data.value; // Array of attachments
+      return data.value; // Array of attachments
     } catch (error) {
       console.error("Error fetching attachments:", error);
       return [];

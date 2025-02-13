@@ -35,6 +35,7 @@ class OutlookMailRepository {
                 attachment.name,
                 attachment.contentType
               );
+
               return {
                 filename: attachment.name,
                 url: s3Url,
