@@ -64,7 +64,7 @@ class NewTicketService {
         console.log("Ignoring self-triggered notification");
         return {
           success: false,
-          message: `Ignoring message from ${tokenRecord.user_outlook_email}`
+          message: `Ignoring self-triggered notification  from  ${tokenRecord.user_outlook_email}`
         };
       }
 
@@ -87,7 +87,7 @@ class NewTicketService {
           emailId,
           tokenRecord,
           emailResponse.data,
-          accessToken
+          accessToken.data.access_token
         );
         console.log("new OUtlook Ticket are data are", newOUtlookTicket.data);
         return { success: true, message: "NewTicketSErvice is working " };
