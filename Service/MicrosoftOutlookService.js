@@ -177,5 +177,28 @@ class MicrosoftOutlookServices {
       return { success: false, message: error.message };
     }
   };
+
+  fetchAttachments = async (messageId, accessToken) => {
+    try {
+      const response = await fetch(
+        `https://graph.microsoft.com/v1.0/me/messages/${messageId}/attachments`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      console.log(
+        "response data value for email attachement are _--------------------------------"
+          .response?.data?.value
+      );
+      return response.data.value; // Array of attachments
+    } catch (error) {
+      console.error("Error fetching attachments:", error);
+      return [];
+    }
+  };
 }
 export default new MicrosoftOutlookServices();

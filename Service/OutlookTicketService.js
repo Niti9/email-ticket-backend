@@ -13,7 +13,8 @@ class OutlookTicketService {
     const create = await OutlookMailRepository.createNewTicket(
       emailId,
       tokenRecord,
-      emailResponse
+      emailResponse,
+      accessToken
     );
     return {
       success: true,

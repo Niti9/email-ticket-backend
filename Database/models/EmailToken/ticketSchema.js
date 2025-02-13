@@ -47,6 +47,14 @@ const ticketSchema = new mongoose.Schema({
   ],
   responseMail: { type: Boolean, default: false }, // Added field
   seen: { type: Boolean, default: false },
+  attachments: [
+    {
+      filename: { type: String, required: true },
+      data: { type: Buffer, required: true }, // Store file as binary data
+      mimeType: { type: String, required: true }, // Store MIME type
+      size: { type: Number } // Optional: store file size in bytes
+    }
+  ],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
