@@ -22,7 +22,7 @@ class OutlookTicketService {
     //   data: create
     // };
 
-    // Call the `testing` API to send response email
+    // // Call the `testing` API to send response email
     const response = await axios.post(
       "https://email-ticket-backend.vercel.app/api/ticket/testing",
       {

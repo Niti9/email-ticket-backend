@@ -42,7 +42,10 @@ class NewTicketService {
         emailResponse
       );
       if (!emailResponse.success) {
-        return { success: false, message: " fetchEmailDetails through error " };
+        return {
+          success: false,
+          message: ` fetchEmailDetails through error ${emailResponse.message}`
+        };
       }
       console.log(" first thing ", emailResponse.from.emailAddress.address);
       console.log("second thing is ", tokenRecord?.user_outlook_email);
