@@ -200,7 +200,7 @@ class MicrosoftOutlookServices {
         "response data value for email attachement are _--------------------------------",
         data?.value
       );
-      return data.value; // Array of attachments
+      return data.value || []; // Array of attachments
     } catch (error) {
       console.error("Error fetching attachments:", error);
       return [];

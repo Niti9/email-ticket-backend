@@ -653,7 +653,13 @@ class EmailControllers {
   getallTickets = async (req, res) => {
     try {
       const tickets = await TicketModel.find({});
-      return res.status(200).json(tickets);
+      // Convert Buffer to Base64
+      const attachments = tickets.attachments.map((file) => ({
+        filename: file.filename,
+        fileType: file.fileType,
+        base64: file.data.toString("base64")
+      }));
+      return res.status(200).json({ tickets, attachments });
     } catch (error) {
       console.error("Error fetching tickets:", error.message);
       res.status(500).send("Error fetching tickets.");

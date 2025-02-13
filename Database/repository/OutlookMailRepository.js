@@ -21,35 +21,24 @@ class OutlookMailRepository {
           accessToken
         );
 
-        // Process each attachment
-        attachments = await Promise.all(
-          emailAttachments.map(async (attachment) => {
+        attachments = emailAttachments
+          .map((attachment) => {
             if (
               attachment["@odata.type"] === "#microsoft.graph.fileAttachment"
             ) {
-              const fileBuffer = Buffer.from(attachment.contentBytes, "base64");
-
-              console.log("fileBuffer is ````````````````", fileBuffer);
-              // // Upload to S3
-              // const s3Url = await uploadToS3(
-              //   fileBuffer,
-              //   attachment.name,
-              //   attachment.contentType
-              // );
-
-              // return {
-              //   filename: attachment.name,
-              //   url: s3Url,
-              //   mimeType: attachment.contentType,
-              //   size: attachment.size
-              // };
+              return {
+                filename: attachment.name,
+                fileType: attachment.contentType, // e.g., "image/png", "application/pdf"
+                data: Buffer.from(attachment.contentBytes, "base64") // Convert to Buffer
+              };
             }
             return null;
           })
-        );
+          .filter((a) => a !== null);
       }
 
-      // Save ticket with attachment URLs
+      console.log("attachements are", attachments);
+      // Save ticket with attachments
       const newTicket = new TicketModel({
         userId: tokenRecord?._id,
         conversationId: emailResponse?.conversationId,
@@ -59,12 +48,8 @@ class OutlookMailRepository {
         senderEmail: emailResponse.sender.emailAddress.address,
         queryDetails: emailResponse?.subject || "No Subject",
         body: { content: emailResponse?.body?.content || "Body is Empty" },
-        attachments: attachments.filter((a) => a !== null), // Remove nulls
-        comments: [],
-        priority: "Medium",
-        status: "Open",
-        responseMail: false,
-        seen: false
+        attachments: attachments,
+        createdAt: new Date()
       });
 
       return await newTicket.save();
