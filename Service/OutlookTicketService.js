@@ -26,7 +26,7 @@ class OutlookTicketService {
     const response = await axios.post(
       "https://email-ticket-backend.vercel.app/api/ticket/testing",
       {
-        accessToken: accessToken.data.access_token,
+        accessToken: accessToken,
         userEmail: senderEmail,
         ticketId: emailId
         // ticketId: newTicket.ticketId
