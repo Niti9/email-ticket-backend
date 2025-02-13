@@ -29,19 +29,20 @@ class OutlookMailRepository {
             ) {
               const fileBuffer = Buffer.from(attachment.contentBytes, "base64");
 
-              // Upload to S3
-              const s3Url = await uploadToS3(
-                fileBuffer,
-                attachment.name,
-                attachment.contentType
-              );
+              console.log("fileBuffer is ````````````````", fileBuffer);
+              // // Upload to S3
+              // const s3Url = await uploadToS3(
+              //   fileBuffer,
+              //   attachment.name,
+              //   attachment.contentType
+              // );
 
-              return {
-                filename: attachment.name,
-                url: s3Url,
-                mimeType: attachment.contentType,
-                size: attachment.size
-              };
+              // return {
+              //   filename: attachment.name,
+              //   url: s3Url,
+              //   mimeType: attachment.contentType,
+              //   size: attachment.size
+              // };
             }
             return null;
           })
