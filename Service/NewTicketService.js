@@ -8,7 +8,9 @@ import OutlookMailRepository from "../Database/repository/OutlookMailRepository.
 class NewTicketService {
   webhookOperations = async (notification) => {
     try {
+      console.log("newticketService we have notification is ", notification);
       const userId = notification.clientState;
+      console.log("user ids is", userId);
       if (!userId) return console.warn("Missing userId in notification.");
 
       const tokenRecord = await TokenModel.findOne({ user_id: userId });
