@@ -76,7 +76,7 @@ class NewTicketService {
           emailId,
           tokenRecord,
           emailResponse,
-          accessToken.data.access_token
+          accessToken
         );
         console.log("new OUtlook Ticket are data are", newOUtlookTicket.data);
         return { success: true, message: "NewTicketSErvice is working " };
