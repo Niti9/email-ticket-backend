@@ -49,9 +49,9 @@ const ticketSchema = new mongoose.Schema({
   seen: { type: Boolean, default: false },
   attachments: [
     {
-      filename: { type: String, required: true },
-      data: { type: Buffer, required: true }, // Store file as binary data
-      mimeType: { type: String, required: true }, // Store MIME type
+      filename: { type: String },
+      data: { type: Buffer }, // Store file as binary data
+      mimeType: { type: String }, // Store MIME type
       size: { type: Number } // Optional: store file size in bytes
     }
   ],
