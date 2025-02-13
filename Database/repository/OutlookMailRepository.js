@@ -5,13 +5,6 @@ import TicketModel from "../models/EmailToken/ticketSchema.js";
 
 class OutlookMailRepository {
   // Extract attachments from emailResponse
-  attachments =
-    emailResponse?.attachments?.map((attachment) => ({
-      filename: attachment.name,
-      data: Buffer.from(attachment.content, "base64"), // Convert to Buffer
-      mimeType: attachment.contentType,
-      size: attachment.size
-    })) || [];
 
   createNewTicket = async (
     emailId,
