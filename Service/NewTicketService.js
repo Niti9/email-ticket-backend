@@ -47,8 +47,10 @@ class NewTicketService {
       // get the email details first and then comparee with the appuserschema . email
       // example
       if (
-        emailResponse?.from?.emailAddress?.address ===
-        tokenRecord?.user_outlook_email
+        emailResponse.from?.emailAddress?.address &&
+        tokenRecord.user_outlook_email &&
+        emailResponse.from.emailAddress.address.toLowerCase().trim() ===
+          tokenRecord.user_outlook_email.toLowerCase().trim()
       ) {
         console.log("Ignoring self-triggered notification");
         return {
