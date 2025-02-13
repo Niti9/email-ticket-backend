@@ -41,6 +41,20 @@ class NewTicketService {
         emailResponse
       );
 
+      // get the email details first and then comparee with the appuserschema . email
+      // example
+      if (
+        emailResponse.from.emailAddress.address ===
+        tokenRecord.user_outlook_email
+      ) {
+        console.log("Ignoring self-triggered notification");
+        return res
+          .status(200)
+          .send(
+            `error of sending message from ${tokenRecord.user_outlook_email} this email `
+          );
+      }
+
       const existingTicket =
         await OutlookMailRepository.FindConversationIdAndEmail(
           emailId,

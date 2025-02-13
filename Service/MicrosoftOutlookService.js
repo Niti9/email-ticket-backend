@@ -34,10 +34,10 @@ class MicrosoftOutlookServices {
 
       // Set expiration based on whether it's the first time or cron renewal
       if (firstTime) {
-        // For first-time subscription, 7 days from now
+        // 6 days and 12 hours from now first days
         expirationDateTime = new Date(
-          Date.now() + 7 * 24 * 60 * 60 * 1000
-        ).toISOString(); // 7 days from now
+          Date.now() + 6 * 24 * 60 * 60 * 1000 + 12 * 60 * 60 * 1000
+        ).toISOString();
       } else if (cronTime) {
         // For renewal, 6 days from now
         expirationDateTime = new Date(
@@ -170,7 +170,7 @@ class MicrosoftOutlookServices {
       console.log("This is the refresh token:", data);
 
       // Step 2: Fetch user's email from Graph API
-      const userEmail = await this.getUserEmail(data.access_token);
+      // const userEmail = await this.getUserEmail(data.access_token);
 
       const accessTokenNewValue = await OutlookRepo.AddorUpdateUserById(
         userId,
@@ -328,11 +328,19 @@ class MicrosoftOutlookServices {
     const url = "https://graph.microsoft.com/v1.0/me";
 
     try {
-      const response = await axios.get(url, {
+      const response = await fetch(url, {
+        method: "GET",
         headers: { Authorization: `Bearer ${accessToken}` }
       });
 
-      return response.data.mail || response.data.userPrincipalName; // Email address
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json(); // Parse response as JSON
+
+      console.log("Fetched User Data:", data);
+      return data.mail || data.userPrincipalName; // Email address
     } catch (error) {
       console.error("Error fetching user email:", error.response?.data);
       throw error;
