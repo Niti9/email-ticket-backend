@@ -462,12 +462,12 @@ class EmailControllers {
       //   clientState: "6746e5a86a0dee2ed8b2cd4f",
       //   tenantId: ""
       // };
-      // await Promise.all(
-      //   notifications.map(async (notification) => {
-      const data = await NewTicketService.webhookOperations(notifications);
-      console.log("data is", data);
-      //   })
-      // );
+      await Promise.all(
+        notifications.map(async (notification) => {
+          const data = await NewTicketService.webhookOperations(notification);
+          console.log("data is", data);
+        })
+      );
 
       return res.status(202).send("Notifications processed.");
     } catch (error) {
