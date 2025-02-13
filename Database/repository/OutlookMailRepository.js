@@ -28,8 +28,9 @@ class OutlookMailRepository {
             ) {
               return {
                 filename: attachment.name,
-                fileType: attachment.contentType, // e.g., "image/png", "application/pdf"
-                data: Buffer.from(attachment.contentBytes, "base64") // Convert to Buffer
+                mimeType: attachment.contentType, // e.g., "image/png", "application/pdf"
+                data: Buffer.from(attachment.contentBytes, "base64"), // Convert to Buffer
+                size: attachment.size
               };
             }
             return null;
