@@ -39,7 +39,7 @@ class NewTicketService {
 
       console.log(
         "fetchEmailsDEtails running __________________________________________________________",
-        emailResponse
+        emailResponse.data
       );
       if (!emailResponse.success) {
         return {
@@ -53,7 +53,7 @@ class NewTicketService {
       // get the email details first and then comparee with the appuserschema . email
       // example
       if (
-        emailResponse.from?.emailAddress?.address &&
+        emailResponse.data.from?.emailAddress?.address &&
         tokenRecord.user_outlook_email &&
         emailResponse.from.emailAddress.address.toLowerCase().trim() ===
           tokenRecord.user_outlook_email.toLowerCase().trim()
@@ -68,13 +68,13 @@ class NewTicketService {
       const existingTicket =
         await OutlookMailRepository.FindConversationIdAndEmail(
           emailId,
-          emailResponse.conversationId
+          emailResponse.data.conversationId
         );
 
       if (existingTicket) {
         const addComment = await OutlookCommentService.createComment(
           emailId,
-          emailResponse,
+          emailResponse.data,
           existingTicket
         );
         console.log("existing ticket are ", addComment);
@@ -83,7 +83,7 @@ class NewTicketService {
         const newOUtlookTicket = await OutlookTicketService.createTicket(
           emailId,
           tokenRecord,
-          emailResponse,
+          emailResponse.data,
           accessToken
         );
         console.log("new OUtlook Ticket are data are", newOUtlookTicket.data);

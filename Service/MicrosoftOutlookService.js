@@ -14,7 +14,11 @@ class MicrosoftOutlookServices {
           headers: { Authorization: `Bearer ${accessToken}` }
         }
       );
-      return emailResponse.data;
+      return {
+        success: true,
+        data: emailResponse.data,
+        message: "emailResponse successfully found"
+      };
     } catch (error) {
       console.error(
         `Error fetching email details for emailId: ${emailId}`,
