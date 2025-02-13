@@ -47,7 +47,10 @@ class NewTicketService {
           message: ` fetchEmailDetails through error ${emailResponse.message}`
         };
       }
-      console.log(" first thing ", emailResponse.from.emailAddress.address);
+      console.log(
+        " first thing ",
+        emailResponse.data.from.emailAddress.address
+      );
       console.log("second thing is ", tokenRecord?.user_outlook_email);
 
       // get the email details first and then comparee with the appuserschema . email
