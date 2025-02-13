@@ -183,7 +183,7 @@ class MicrosoftOutlookServices {
       const response = await fetch(
         `https://graph.microsoft.com/v1.0/me/messages/${messageId}/attachments`,
         {
-          method: "POST",
+          method: "GET",
           headers: {
             Authorization: `Bearer ${accessToken}`
           }
