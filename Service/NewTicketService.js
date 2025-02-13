@@ -14,6 +14,7 @@ class NewTicketService {
       if (!userId) return console.warn("Missing userId in notification.");
 
       const tokenRecord = await TokenModel.findOne({ user_id: userId });
+      console.log("token record is ", tokenRecord);
       if (!tokenRecord)
         return console.warn(`No token record for user: ${userId}`);
 
@@ -41,7 +42,7 @@ class NewTicketService {
         emailResponse
       );
       console.log(" first thing ", emailResponse.from.emailAddress.address);
-      console.log("second thing is ", tokenRecord.user_outlook_email);
+      console.log("second thing is ", tokenRecord?.user_outlook_email);
 
       // get the email details first and then comparee with the appuserschema . email
       // example
