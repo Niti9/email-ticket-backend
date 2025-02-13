@@ -2,7 +2,7 @@
 // import OutlookRepo from "../Database/repository/OutlookRepo.js";
 
 import axios from "axios";
-import OutlookRepo from "../Database/repository/OutlookRepo";
+import OutlookRepo from "../Database/repository/OutlookRepo.js";
 
 class MicrosoftOutlookServices {
   // Fetch email details function
