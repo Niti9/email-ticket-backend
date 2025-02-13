@@ -20,7 +20,10 @@ class MicrosoftOutlookServices {
         `Error fetching email details for emailId: ${emailId}`,
         error
       );
-      return null;
+      return {
+        success: false,
+        message: `Error fetching email details for emailId: ${emailId} and this is the error:${error}`
+      };
     }
   };
   automaticSubscription = async (

@@ -41,6 +41,9 @@ class NewTicketService {
         "fetchEmailsDEtails running __________________________________________________________",
         emailResponse
       );
+      if (!emailResponse.success) {
+        return { success: false, message: " fetchEmailDetails through error " };
+      }
       console.log(" first thing ", emailResponse.from.emailAddress.address);
       console.log("second thing is ", tokenRecord?.user_outlook_email);
 
