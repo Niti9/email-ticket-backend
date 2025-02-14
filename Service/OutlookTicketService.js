@@ -17,11 +17,11 @@ class OutlookTicketService {
       emailResponse,
       accessToken
     );
-    return {
-      success: true,
-      message: "New Ticket Generate successfully",
-      data: create
-    };
+    // return {
+    //   success: true,
+    //   message: "New Ticket Generate successfully",
+    //   data: create
+    // };
 
     // // // Call the `testing` API to send response email
     // const response = await axios.post(
@@ -46,10 +46,12 @@ class OutlookTicketService {
     //   data: create
     // };
 
-    // const hasSentResponse = await TicketModel.findOne({
-    //   emailId,
-    //   responseMail: true
-    // });
+    const hasSentResponse = await TicketModel.findOne({
+      emailId,
+      responseMail: true
+    });
+    console.log("hassent response is", hasSentResponse);
+    console.log("ticketId is", ticketId);
     // try {
     //   if (hasSentResponse) {
     //     console.log(
