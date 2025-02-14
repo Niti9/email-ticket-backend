@@ -445,12 +445,11 @@ class EmailControllers {
           const response = await NewTicketService.webhookOperations(
             notification
           );
+          console.log("response of webhoook output", response);
           if (response.success) {
             console.log("webhook output is", response.message);
           } else {
-            throw new Error(
-              `webhook output throws error : ${response.message}`
-            );
+            throw new Error(`webhook output throws error : ${response}`);
           }
         })
       );
