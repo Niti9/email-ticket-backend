@@ -65,31 +65,12 @@ ticketSchema.pre("save", async function (next) {
     if (!this.isNew) return next(); // Only generate ticketId for new tickets
 
     const user = await TokenModel.findById(this.userId);
-
-    // Fetch user details
-    // const user = await TokenModel.findOne({ user_id: this.userId })
-    //   .select("userName")
-    //   .lean();
-    // console.log("Fetched User in TicketSchema:", JSON.stringify(user, null, 2));
-    // console.log("User object keys:", Object.keys(user || {})); // Debugging
-    // console.log("Checking userName:", user?.userName);
-    // // const user = await TokenModel.findById(this.userId);
-    // console.log("user  in ticketSchema are ", user);
-    // console.log("user  in ticketSchema are ", user.userName);
     let userName = "Noyt"; // Default name if user is not found
-    // Check if user and userName exist
-    console.log("typeof username", typeof user.userName);
     if (user && typeof user.userName === "string") {
       console.log("Raw userName from DB:", user.userName); // Debugging
 
       userName = user.userName.toUpperCase().replace(/\s+/g, "-");
-      console.log("Formatted userName:", userName); // Debugging
     }
-
-    console.log("Final userName for Ticket:", userName);
-    // if (!user) return next(new Error("User not found"));
-
-    // let userName = user.userName.toUpperCase().replace(/\s+/g, "-"); // Convert username to uppercase and replace spaces with '-'
 
     // Find the last ticket with the same user prefix
     let lastTicket = await mongoose

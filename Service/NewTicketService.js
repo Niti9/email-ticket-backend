@@ -10,7 +10,6 @@ class NewTicketService {
     try {
       console.log("newticketService we have notification is ", notification);
       const userId = notification.clientState;
-      console.log("user ids is", userId);
       if (!userId) return console.warn("Missing userId in notification.");
 
       const tokenRecord = await TokenModel.findOne({ user_id: userId });
@@ -28,50 +27,27 @@ class NewTicketService {
       const emailId = notification.resource.split("/").pop();
       if (!emailId) return console.error("Invalid emailId in notification.");
 
-      console.log("notification is ", notification);
-      console.log("Processing emailId:", emailId);
-
       // Fetch email details
       const emailResponse = await MicrosoftOutlookService.fetchEmailDetails(
         emailId,
         accessToken.data.access_token
       );
 
-      console.log(
-        "fetchEmailsDEtails running __________________________________________________________",
-        emailResponse.data
-      );
       if (!emailResponse.success) {
         throw new Error(
           `fetchEmailDetails threw an error: ${emailResponse.message}`
         );
-        // return {
-        //   success: false,
-        //   message: ` fetchEmailDetails through error ${emailResponse.message}`
-        // };
       }
-      console.log(
-        " first thing ",
-        emailResponse.data.from.emailAddress.address
-      );
-      console.log("second thing is ", tokenRecord?.user_outlook_email);
 
-      // get the email details first and then comparee with the appuserschema . email
-      // example
       if (
         emailResponse.data.from?.emailAddress?.address &&
         tokenRecord.user_outlook_email &&
         emailResponse.data.from.emailAddress.address.toLowerCase().trim() ===
           tokenRecord.user_outlook_email.toLowerCase().trim()
       ) {
-        console.log("Ignoring self-triggered notification");
         throw new Error(
           `Ignoring self-triggered notification: ${tokenRecord.user_outlook_email}`
         );
-        // return {
-        //   success: false,
-        //   message: `Ignoring self-triggered notification  from  ${tokenRecord.user_outlook_email}`
-        // };
       }
 
       const existingTicket =

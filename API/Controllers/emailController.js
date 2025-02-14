@@ -5,6 +5,7 @@ import cron from "node-cron";
 import MicrosoftOutlookService from "../../Service/MicrosoftOutlookService.js";
 import NewTicketService from "../../Service/NewTicketService.js";
 import OutlookMailRepository from "../../Database/repository/OutlookMailRepository.js";
+import { response } from "express";
 class EmailControllers {
   seenAllTickets = async (req, res) => {
     try {
@@ -439,26 +440,18 @@ class EmailControllers {
         return res.status(204).send("No notifications received.");
       }
 
-      // const notification = {
-      //   subscriptionId: "109b4719-ebdb-401f-9990-4c3eb027ba0e",
-      //   subscriptionExpirationDateTime: "2025-02-17T18:30:01.43+00:00",
-      //   changeType: "created",
-      //   resource:
-      //     "Users/924304495c60cab3/Messages/AQMkADAwATM0MDAAMi04NjNhLWEzMGMtMDACLTAwCgBGAAADaP9ss4XKygBEvIXLgwOx84EHAMD7k9GdyVtDiHguHJ5J8FYAAAIBDAAAAMD7k9GdyVtDiHguHJ5J8FYAAAAT5YUnAAAA",
-      //   resourceData: {
-      //     "@odata.type": "#Microsoft.Graph.Message",
-      //     "@odata.id":
-      //       "Users/924304495c60cab3/Messages/AQMkADAwATM0MDAAMi04NjNhLWEzMGMtMDACLTAwCgBGAAADaP9ss4XKygBEvIXLgwOx84EHAMD7k9GdyVtDiHguHJ5J8FYAAAIBDAAAAMD7k9GdyVtDiHguHJ5J8FYAAAAT5YUnAAAA",
-      //     "@odata.etag": 'W/"CQAAABYAAADA+5PRnclbQ4h4LhyeSfBWAAAT4NUr"',
-      //     id: "AQMkADAwATM0MDAAMi04NjNhLWEzMGMtMDACLTAwCgBGAAADaP9ss4XKygBEvIXLgwOx84EHAMD7k9GdyVtDiHguHJ5J8FYAAAIBDAAAAMD7k9GdyVtDiHguHJ5J8FYAAAAT5YUnAAAA"
-      //   },
-      //   clientState: "6746e5a86a0dee2ed8b2cd4f",
-      //   tenantId: ""
-      // };
       await Promise.all(
         notifications.map(async (notification) => {
-          const data = await NewTicketService.webhookOperations(notification);
-          console.log("data is", data);
+          const response = await NewTicketService.webhookOperations(
+            notification
+          );
+          if (response.success) {
+            console.log("webhook output is", response.message);
+          } else {
+            throw new Error(
+              `webhook output throws error : ${response.message}`
+            );
+          }
         })
       );
 
