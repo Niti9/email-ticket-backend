@@ -446,11 +446,6 @@ class EmailControllers {
             notification
           );
           console.log("response of webhoook output", response);
-          if (response.success) {
-            console.log("webhook output is", response.message);
-          } else {
-            throw new Error(`webhook output throws error : ${response}`);
-          }
         })
       );
 
