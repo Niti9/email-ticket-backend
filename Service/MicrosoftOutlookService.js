@@ -262,6 +262,15 @@ class MicrosoftOutlookServices {
   // };
   sendConfirmationEmail = async (accessToken, userEmail, ticketId) => {
     try {
+      if (!accessToken) {
+        console.error("Access token is missing!");
+        return { success: false, message: "Access token is required" };
+      }
+
+      if (!userEmail) {
+        console.error("User email is missing!");
+        return { success: false, message: "User email is required" };
+      }
       const emailBody = {
         message: {
           subject: `Your Ticket is Raised - Ticket ID: ${ticketId}`,
