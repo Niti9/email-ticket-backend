@@ -445,8 +445,6 @@ class EmailControllers {
           const response = await NewTicketService.webhookOperations(
             notification
           );
-          if (response.success)
-            console.log("response of webhoook output", response.message);
         })
       );
 
