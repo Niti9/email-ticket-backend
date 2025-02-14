@@ -66,7 +66,8 @@ ticketSchema.pre("save", async function (next) {
 
     // Fetch user details
     const user = await TokenModel.findById(this.userId);
-    let userName = "RAMAN"; // Default name if user is not found
+    console.log("user  in ticketSchema are ", user);
+    let userName = "Noyt"; // Default name if user is not found
     if (user && user.userName) {
       userName = user.userName.toUpperCase().replace(/\s+/g, "-");
     }

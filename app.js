@@ -107,7 +107,7 @@ EmailRoutes.post("/api/ticket/tickets/webhook", emailController.webhook);
 EmailRoutes.get("/api/ticket/tickets", emailController.getallTickets);
 EmailRoutes.put("/api/ticket/tickets/:id", emailController.EditTicket);
 EmailRoutes.put("/api/ticket/tickets/:id", emailController.EditTicket);
-EmailRoutes.post("/api/ticket/testing", emailController.testing);
+EmailRoutes.post("/api/ticket/testing", emailController.sendResponseMailToUser);
 EmailRoutes.get("/api/ticket/tickets/unseen", emailController.unseenTickets);
 EmailRoutes.patch("/api/ticket/tickets/seen/:id", emailController.seenTickets);
 EmailRoutes.patch(
