@@ -51,10 +51,6 @@ class EmailControllers {
         return { success: false, message: "User email is required" };
       }
 
-      console.log(
-        `Sending confirmation email to ${userEmail} for Ticket ID: ${ticketId}`
-      );
-
       // // **Check if response mail was already sent**
       const existingTicket = await OutlookMailRepository.EmailIdAlreadyExists(
         ticketId

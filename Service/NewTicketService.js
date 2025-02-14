@@ -42,10 +42,13 @@ class NewTicketService {
         emailResponse.data
       );
       if (!emailResponse.success) {
-        return {
-          success: false,
-          message: ` fetchEmailDetails through error ${emailResponse.message}`
-        };
+        throw new Error(
+          `fetchEmailDetails threw an error: ${emailResponse.message}`
+        );
+        // return {
+        //   success: false,
+        //   message: ` fetchEmailDetails through error ${emailResponse.message}`
+        // };
       }
       console.log(
         " first thing ",
@@ -62,10 +65,13 @@ class NewTicketService {
           tokenRecord.user_outlook_email.toLowerCase().trim()
       ) {
         console.log("Ignoring self-triggered notification");
-        return {
-          success: false,
-          message: `Ignoring self-triggered notification  from  ${tokenRecord.user_outlook_email}`
-        };
+        throw new Error(
+          `Ignoring self-triggered notification: ${tokenRecord.user_outlook_email}`
+        );
+        // return {
+        //   success: false,
+        //   message: `Ignoring self-triggered notification  from  ${tokenRecord.user_outlook_email}`
+        // };
       }
 
       const existingTicket =
