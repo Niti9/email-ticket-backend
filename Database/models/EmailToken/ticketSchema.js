@@ -68,9 +68,16 @@ ticketSchema.pre("save", async function (next) {
     const user = await TokenModel.findById(this.userId);
     console.log("user  in ticketSchema are ", user);
     let userName = "Noyt"; // Default name if user is not found
-    if (user && user.userName) {
+    // Check if user and userName exist
+    console.log("typeof username", typeof user.userName);
+    if (user && typeof user.userName === "string") {
+      console.log("Raw userName from DB:", user.userName); // Debugging
+
       userName = user.userName.toUpperCase().replace(/\s+/g, "-");
+      console.log("Formatted userName:", userName); // Debugging
     }
+
+    console.log("Final userName for Ticket:", userName);
     // if (!user) return next(new Error("User not found"));
 
     // let userName = user.userName.toUpperCase().replace(/\s+/g, "-"); // Convert username to uppercase and replace spaces with '-'
