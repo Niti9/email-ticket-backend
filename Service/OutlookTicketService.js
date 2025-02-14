@@ -52,6 +52,12 @@ class OutlookTicketService {
     });
     console.log("hassent response is", hasSentResponse);
     console.log("ticketId is", ticketId);
+    return {
+      success: true,
+      message: "New Ticket Generate successfully",
+      data: create
+    };
+
     // try {
     //   if (hasSentResponse) {
     //     console.log(
