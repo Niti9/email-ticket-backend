@@ -52,52 +52,47 @@ class OutlookTicketService {
     });
     console.log("hassent response is", hasSentResponse);
     console.log("ticketId is", ticketId);
-    return {
-      success: true,
-      message: "New Ticket Generate successfully",
-      data: create
-    };
 
-    // try {
-    //   if (hasSentResponse) {
-    //     console.log(
-    //       `Skipping response email for ticket: ${ticketId}, already sent.`
-    //     );
-    //     return {
-    //       success: false,
-    //       message: `Response email already sent for ticket: ${ticketId}`
-    //     };
-    //   }
+    try {
+      if (hasSentResponse) {
+        console.log(
+          `Skipping response email for ticket: ${ticketId}, already sent.`
+        );
+        return {
+          success: false,
+          message: `Response email already sent for ticket: ${ticketId}`
+        };
+      }
 
-    //   const mailSent = await MicrosoftOutlookService.sendConfirmationEmail(
-    //     accessToken,
-    //     senderEmail,
-    //     ticketId
-    //   );
+      const mailSent = await MicrosoftOutlookService.sendConfirmationEmail(
+        accessToken,
+        senderEmail,
+        ticketId
+      );
 
-    //   if (mailSent.success) {
-    //     await TicketModel.updateOne(
-    //       { emailId: emailId }, // ✅ Update only the new ticket
-    //       { $set: { responseMail: true } }
-    //     );
-    //     console.log(`✅ Response mail sent for ticket: ${emailId}`);
-    //     return {
-    //       success: true,
-    //       message: `✅ Response mail sent for ticket: ${ticketId}`,
-    //       data: create
-    //     };
-    //   } else {
-    //     console.error(
-    //       `❌ Failed to send confirmation email for ticket: ${ticketId}`
-    //     );
-    //     return {
-    //       success: false,
-    //       message: `❌ Failed to send confirmation email for ticket: ${hasSentResponse.ticketId}`
-    //     };
-    //   }
-    // } catch (error) {
-    //   console.log("hasSentREsponse error is here ", error);
-    // }
+      if (mailSent.success) {
+        await TicketModel.updateOne(
+          { emailId: emailId }, // ✅ Update only the new ticket
+          { $set: { responseMail: true } }
+        );
+        console.log(`✅ Response mail sent for ticket: ${emailId}`);
+        return {
+          success: true,
+          message: `✅ Response mail sent for ticket: ${ticketId}`,
+          data: create
+        };
+      } else {
+        console.error(
+          `❌ Failed to send confirmation email for ticket: ${ticketId}`
+        );
+        return {
+          success: false,
+          message: `❌ Failed to send confirmation email for ticket: ${hasSentResponse.ticketId}`
+        };
+      }
+    } catch (error) {
+      console.log("hasSentREsponse error is here ", error);
+    }
   };
 }
 export default new OutlookTicketService();
