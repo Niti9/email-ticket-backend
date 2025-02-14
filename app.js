@@ -109,7 +109,11 @@ EmailRoutes.put("/api/ticket/tickets/:id", emailController.EditTicket);
 EmailRoutes.put("/api/ticket/tickets/:id", emailController.EditTicket);
 EmailRoutes.post("/api/ticket/testing", emailController.sendResponseMailToUser);
 EmailRoutes.get("/api/ticket/tickets/unseen", emailController.unseenTickets);
-EmailRoutes.patch("/api/ticket/tickets/seen/:id", emailController.seenTickets);
+EmailRoutes.patch("/api/ticket/tickets/read/:id", emailController.seenTickets);
+EmailRoutes.patch(
+  "/api/ticket/tickets/seen/:id",
+  emailController.markTicketAsRead
+);
 EmailRoutes.patch(
   "/api/ticket/tickets/seen-all",
   emailController.seenAllTickets

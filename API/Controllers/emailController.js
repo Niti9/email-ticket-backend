@@ -31,6 +31,16 @@ class EmailControllers {
       res.status(500).json({ message: "Error marking ticket as seen" });
     }
   };
+  markTicketAsRead = async (req, res) => {
+    try {
+      await TicketModel.findByIdAndUpdate(req.params.id, { unRead: false });
+      res.json({ message: "Ticket marked as read" });
+    } catch (error) {
+      console.error("Error marking ticket as read:", error);
+      res.status(500).json({ message: "Error marking ticket as read" });
+    }
+  };
+
   unseenTickets = async (req, res) => {
     try {
       const unseenTickets = await TicketModel.find({ seen: false });
