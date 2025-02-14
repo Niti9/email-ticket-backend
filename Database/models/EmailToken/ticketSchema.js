@@ -65,8 +65,15 @@ ticketSchema.pre("save", async function (next) {
     if (!this.isNew) return next(); // Only generate ticketId for new tickets
 
     // Fetch user details
-    const user = await TokenModel.findById(this.userId);
+    const user = await TokenModel.findOne({ user_id: this.userId })
+      .select("userName")
+      .lean();
+    console.log("Fetched User in TicketSchema:", JSON.stringify(user, null, 2));
+    console.log("User object keys:", Object.keys(user || {})); // Debugging
+    console.log("Checking userName:", user?.userName);
+    // const user = await TokenModel.findById(this.userId);
     console.log("user  in ticketSchema are ", user);
+    console.log("user  in ticketSchema are ", user.userName);
     let userName = "Noyt"; // Default name if user is not found
     // Check if user and userName exist
     console.log("typeof username", typeof user.userName);
