@@ -55,7 +55,7 @@ const ticketSchema = new mongoose.Schema({
       size: { type: Number } // Optional: store file size in bytes
     }
   ],
-  unRead: { type: String, default: true },
+  unRead: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
