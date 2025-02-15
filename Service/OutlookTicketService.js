@@ -33,7 +33,7 @@ class OutlookTicketService {
     //   }
     // );
 
-    const response = MicrosoftOutlookService.sendResponseMailToUser(
+    const response = await MicrosoftOutlookService.sendResponseMailToUser(
       accessToken,
       senderEmail,
       emailId
