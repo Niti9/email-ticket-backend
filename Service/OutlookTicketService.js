@@ -47,8 +47,8 @@ class OutlookTicketService {
     }
     return {
       success: false,
-      message: "New Ticket Generate Failed 🙅"
-      // data: create
+      message: "New Ticket Generate Failed 🙅",
+      data: create
     };
     // return {
     //   success: true,
