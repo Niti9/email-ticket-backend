@@ -3,6 +3,7 @@
 
 import axios from "axios";
 import OutlookRepo from "../Database/repository/OutlookRepo.js";
+import OutlookMailRepository from "../Database/repository/OutlookMailRepository.js";
 
 class MicrosoftOutlookServices {
   // Fetch email details function
@@ -307,6 +308,90 @@ class MicrosoftOutlookServices {
       return { success: true, message: "Email sent successfully" };
     } catch (error) {
       console.error("Error sending confirmation email:", error);
+      return { success: false, message: error.message };
+    }
+  };
+
+  sendResponseMailToUser = async (accessToken, userEmail, ticketId) => {
+    try {
+      if (!accessToken) {
+        console.error("Access token is missing!");
+        return { success: false, message: "Access token is required" };
+      }
+
+      if (!userEmail) {
+        console.error("User email is missing!");
+        return { success: false, message: "User email is required" };
+      }
+
+      // // **Check if response mail was already sent**
+      const existingTicket = await OutlookMailRepository.EmailIdAlreadyExists(
+        ticketId
+      );
+      if (existingTicket?.responseMail) {
+        console.log(
+          `⚠️ Email already sent for Ticket ID: ${ticketId}, skipping.`
+        );
+        return res
+          .status(200)
+          .json({ success: false, message: "Email already sent" });
+      }
+
+      // Email Body
+      const emailBody = {
+        message: {
+          subject: `Your Ticket is Raised - Ticket ID: ${existingTicket.ticketId}`,
+          // subject: `Your Ticket is Raised - Ticket ID: ${ticketId}`,
+          body: {
+            contentType: "Text",
+            content: `We have received your request. Your Ticket ID is '${existingTicket.ticketId}'. We will resolve your issue as soon as possible.`
+          },
+          toRecipients: [{ emailAddress: { address: userEmail } }]
+        },
+        saveToSentItems: "true"
+      };
+
+      // Send Email
+      const emailResponse = await fetch(
+        "https://graph.microsoft.com/v1.0/me/sendMail",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(emailBody)
+        }
+      );
+
+      const responseText = await emailResponse.text();
+
+      if (!emailResponse.ok) {
+        console.error(
+          `Failed to send email to ${userEmail}. Status: ${emailResponse.status}, Response: ${responseText}`
+        );
+        return {
+          success: false,
+          message: `Failed to send email: ${responseText}`
+        };
+      }
+
+      // ✅ Update ticket's responseMail to true
+      await TicketModel.updateOne(
+        { emailId: ticketId },
+        { $set: { responseMail: true } }
+      );
+      return {
+        success: true,
+        message: `✅ Confirmation email successfully sent to this email${userEmail}`
+      };
+
+      // return res.status(200).json({
+      //   success: true,
+      //   message: `✅ Confirmation email successfully sent to this email${userEmail}`
+      // });
+    } catch (error) {
+      console.error("🚨 Error sending confirmation email:", error);
       return { success: false, message: error.message };
     }
   };

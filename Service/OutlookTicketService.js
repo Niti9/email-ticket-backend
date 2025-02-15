@@ -23,21 +23,38 @@ class OutlookTicketService {
     //   data: create
     // };
 
-    // // // Call the `testing` API to send response email
-    const response = await axios.post(
-      "https://email-ticket-backend.vercel.app/api/ticket/testing",
-      {
-        accessToken: accessToken,
-        userEmail: senderEmail,
-        ticketId: emailId
-      }
-    );
+    // // // // Call the `testing` API to send response email
+    // const response = await axios.post(
+    //   "https://email-ticket-backend.vercel.app/api/ticket/testing",
+    //   {
+    //     accessToken: accessToken,
+    //     userEmail: senderEmail,
+    //     ticketId: emailId
+    //   }
+    // );
 
+    const response = MicrosoftOutlookService.sendResponseMailToUser(
+      accessToken,
+      senderEmail,
+      emailId
+    );
+    if (response.success) {
+      return {
+        success: true,
+        message: "New Ticket Generate successfully",
+        data: create
+      };
+    }
     return {
-      success: true,
-      message: "New Ticket Generate successfully",
-      data: create
+      success: false,
+      message: "New Ticket Generate Failed 🙅"
+      // data: create
     };
+    // return {
+    //   success: true,
+    //   message: "New Ticket Generate successfully",
+    //   data: create
+    // };
   };
 }
 export default new OutlookTicketService();
